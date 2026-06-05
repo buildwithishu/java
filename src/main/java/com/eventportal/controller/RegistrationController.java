@@ -67,6 +67,17 @@ public class RegistrationController {
         return cancelled;
     }
 
+    public boolean cancelMyRegistrationForEvent(long eventId) throws SQLException {
+        User student = requireStudent();
+        Registration registration = registrationDAO.findByUser(student.id()).stream()
+                .filter(candidate -> candidate.eventId() == eventId)
+                .filter(Registration::isActive)
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Active registration not found for this event"));
+
+        return cancelRegistration(registration.id());
+    }
+
     public List<Registration> findMyRegistrations() throws SQLException {
         User student = requireStudent();
         return registrationDAO.findByUser(student.id());

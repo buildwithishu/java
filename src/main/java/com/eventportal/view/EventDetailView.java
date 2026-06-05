@@ -54,6 +54,9 @@ public class EventDetailView {
                 detail("Description", event.description())
         );
 
+        if (currentUser.role() == Role.STUDENT) {
+            content.getChildren().add(studentActionSection());
+        }
         if (currentUser.role() == Role.ADMIN) {
             content.getChildren().add(registeredStudentsSection());
         }
@@ -69,6 +72,57 @@ public class EventDetailView {
         root.getStyleClass().add("app-root");
         root.setPadding(new Insets(24));
         return root;
+    }
+
+    private Parent studentActionSection() {
+        VBox section = new VBox(8);
+        Label message = label("", "error-text");
+        Button actionButton = new Button();
+        configureStudentAction(actionButton, message);
+        section.getChildren().addAll(actionButton, message);
+        return section;
+    }
+
+    private void configureStudentAction(Button actionButton, Label message) {
+        try {
+            if (registrationController.isAlreadyRegistered(event.id())) {
+                actionButton.setText("Cancel Registration");
+                actionButton.setDisable(false);
+                actionButton.setOnAction(action -> cancelRegistration(actionButton, message));
+                return;
+            }
+            actionButton.setText("Register");
+            actionButton.setDisable(!event.hasAvailableSeats());
+            actionButton.setOnAction(action -> registerForEvent(actionButton, message));
+        } catch (SQLException exception) {
+            actionButton.setText("Register");
+            actionButton.setDisable(true);
+            showError(message, "Unable to check registration status. Database unavailable.");
+        }
+    }
+
+    private void registerForEvent(Button actionButton, Label message) {
+        try {
+            registrationController.registerForEvent(event.id());
+            showSuccess(message, "Registration confirmed.");
+            configureStudentAction(actionButton, message);
+        } catch (SQLException exception) {
+            showError(message, "Registration failed because the database is unavailable.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            showError(message, exception.getMessage());
+        }
+    }
+
+    private void cancelRegistration(Button actionButton, Label message) {
+        try {
+            registrationController.cancelMyRegistrationForEvent(event.id());
+            showSuccess(message, "Registration cancelled.");
+            configureStudentAction(actionButton, message);
+        } catch (SQLException exception) {
+            showError(message, "Cancellation failed because the database is unavailable.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            showError(message, exception.getMessage());
+        }
     }
 
     private Parent registeredStudentsSection() {
@@ -105,5 +159,21 @@ public class EventDetailView {
         label.getStyleClass().add(styleClass);
         label.setWrapText(true);
         return label;
+    }
+
+    private static void showSuccess(Label label, String text) {
+        label.getStyleClass().remove("error-text");
+        if (!label.getStyleClass().contains("success-text")) {
+            label.getStyleClass().add("success-text");
+        }
+        label.setText(text);
+    }
+
+    private static void showError(Label label, String text) {
+        label.getStyleClass().remove("success-text");
+        if (!label.getStyleClass().contains("error-text")) {
+            label.getStyleClass().add("error-text");
+        }
+        label.setText(text);
     }
 }

@@ -84,3 +84,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verification note: event detail UI depends on JavaFX/Maven; local `mvn` remains unavailable.
 - 2026-06-05: Added reusable event filtering utility and event-list search/category/status controls.
 - 2026-06-05: Verified event filtering utility with dependency-free `javac`; JUnit execution remains Maven-bound.
+- 2026-06-05: Added event-detail register/cancel actions for students.
+- 2026-06-05: Verified event-detail registration controller path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
