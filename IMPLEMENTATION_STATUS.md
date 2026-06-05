@@ -17,7 +17,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Database schema | In progress | Core tables, constraints, indexes, admin seed, and sample seed data added |
 | Models | In progress | Immutable records and enums added |
 | DAO layer | In progress | Configuration loader, database connection manager, UserDAO, and EventDAO added |
-| Controller/service layer | In progress | Auth controller foundation added |
+| Controller/service layer | In progress | Auth and event controller foundations added |
 | JavaFX views | Not started | Login, dashboards, event screens, certificates, notifications |
 | Utilities | In progress | Validation, date/time, session, and password helpers added |
 | CI/CD | Not started | GitHub Actions for CI, release, Docker build |
@@ -38,3 +38,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified DAO source compilation with `javac`; full Maven tests still blocked by missing `mvn`.
 - 2026-06-05: Added BCrypt password helper, session manager, and AuthController for login/student registration.
 - 2026-06-05: Verified dependency-free backend subset with `javac`; BCrypt-backed auth requires Maven for full compile/test.
+- 2026-06-05: Added EventController with admin-only event creation, updates, cancellation, search, and validation.
+- 2026-06-05: Verified EventController source compilation with dependency-free backend subset using `javac`.
