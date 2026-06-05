@@ -2,16 +2,21 @@ package com.eventportal.view;
 
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
+import com.eventportal.model.EventCategory;
+import com.eventportal.model.EventStatus;
 import com.eventportal.model.User;
 import com.eventportal.util.DateTimeUtil;
+import com.eventportal.util.EventFilterUtil;
 import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -41,20 +46,63 @@ public class EventListView {
         VBox list = new VBox(12);
         list.setPadding(new Insets(4));
 
-        if (events.isEmpty()) {
-            Label empty = new Label("No upcoming events are available.");
-            empty.getStyleClass().add("muted-text");
-            list.getChildren().add(empty);
-        } else {
-            for (Event event : events) {
-                list.getChildren().add(eventCard(event));
-            }
-        }
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search events");
+
+        ComboBox<EventCategory> categoryFilter = new ComboBox<>();
+        categoryFilter.setPromptText("All Categories");
+        categoryFilter.getItems().setAll(EventCategory.values());
+
+        ComboBox<EventStatus> statusFilter = new ComboBox<>();
+        statusFilter.setPromptText("All Statuses");
+        statusFilter.getItems().setAll(EventStatus.values());
+
+        Button clearButton = new Button("Clear");
+
+        Runnable refresh = () -> refreshEvents(
+                list,
+                searchField.getText(),
+                categoryFilter.getValue(),
+                statusFilter.getValue()
+        );
+
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> refresh.run());
+        categoryFilter.valueProperty().addListener((observable, oldValue, newValue) -> refresh.run());
+        statusFilter.valueProperty().addListener((observable, oldValue, newValue) -> refresh.run());
+        clearButton.setOnAction(action -> {
+            searchField.clear();
+            categoryFilter.setValue(null);
+            statusFilter.setValue(null);
+            refresh.run();
+        });
+
+        HBox filters = new HBox(10, searchField, categoryFilter, statusFilter, clearButton);
+        filters.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+
+        refresh.run();
 
         ScrollPane scrollPane = new ScrollPane(list);
         scrollPane.setFitToWidth(true);
         scrollPane.getStyleClass().add("transparent-scroll");
-        return scrollPane;
+
+        VBox root = new VBox(12, filters, scrollPane);
+        return root;
+    }
+
+    private void refreshEvents(VBox list, String keyword, EventCategory category, EventStatus status) {
+        list.getChildren().clear();
+
+        List<Event> filteredEvents = EventFilterUtil.filter(events, keyword, category, status);
+        if (filteredEvents.isEmpty()) {
+            Label empty = new Label("No events match the current filters.");
+            empty.getStyleClass().add("muted-text");
+            list.getChildren().add(empty);
+        } else {
+            for (Event event : filteredEvents) {
+                list.getChildren().add(eventCard(event));
+            }
+        }
     }
 
     private Parent eventCard(Event event) {
