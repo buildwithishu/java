@@ -20,7 +20,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Controller/service layer | In progress | Auth, event, registration, notification, certificate, and dashboard controller foundations added |
 | JavaFX views | Not started | Login, dashboards, event screens, certificates, notifications |
 | Utilities | In progress | Validation, date/time, session, password, and PDF certificate helpers added |
-| CI/CD | Not started | GitHub Actions for CI, release, Docker build |
+| CI/CD | In progress | CI workflow added; release and Docker build workflows pending |
 | Documentation | Not started | README, contributing, PR template |
 
 ## Implementation Log
@@ -48,3 +48,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified non-PDFBox backend subset with `javac`; full Maven/PDFBox verification is blocked because local `mvn` is missing and Docker daemon is unavailable.
 - 2026-06-05: Added dashboard summary models and DashboardController for admin event, registration, student, category, and popular-event stats.
 - 2026-06-05: Verified dashboard/backend subset compilation with `javac`; full Maven tests still blocked by missing `mvn`.
+- 2026-06-05: Added GitHub Actions CI workflow with JDK 21, PostgreSQL service, Maven test/package, and artifact uploads.
