@@ -2,6 +2,8 @@
 target/
 *.jar
 *.class
+.mvn/apache-maven-*/
+.mvn/apache-maven-*.tar.gz
 
 # IDE
 .idea/

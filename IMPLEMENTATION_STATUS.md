@@ -12,7 +12,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Maven project skeleton | In progress | Java 17+, JavaFX 21, Maven packaging scaffolded |
+| Maven project skeleton | In progress | Java 17+, JavaFX 21, Maven packaging scaffolded; Unix Maven bootstrapper added |
 | Docker local database | In progress | Compose, test Compose, Dockerfile, env template, and Makefile added |
 | Database schema | In progress | Core tables, constraints, indexes, admin seed, and sample seed data added |
 | Models | In progress | Immutable records and enums added |
@@ -74,3 +74,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified event lifecycle backend subset with `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
 - 2026-06-05: Hardened certificate-ready notifications to avoid duplicates and added validated old-notification cleanup.
 - 2026-06-05: Verified notification hardening backend subset with `javac`; full Maven/PDFBox verification remains blocked by missing `mvn`.
+- 2026-06-05: Added Unix Maven bootstrapper script so the project can run Maven without a preinstalled `mvn`.
+- 2026-06-05: Verification note: `./mvnw -v` could not complete because Maven binary download from Apache archive stalled in this environment.
