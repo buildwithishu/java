@@ -89,3 +89,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Added certificate PDF open action with missing-file and unsupported-desktop feedback.
 - 2026-06-05: Added reusable date-time formatting for certificate generated timestamps.
 - 2026-06-05: Verified certificate timestamp utility with dependency-free `javac`; JUnit execution remains Maven-bound.
+- 2026-06-05: Added notification unread count, read/unread status labels, and created-at timestamps.
+- 2026-06-05: Verified notification timestamp model/util path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
