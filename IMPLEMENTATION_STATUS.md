@@ -64,3 +64,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Added registration detail model/query so student registration cards show event title, date, and venue.
 - 2026-06-05: Verified registration detail backend subset with `javac`; full Maven/UI verification remains blocked by missing `mvn`.
 - 2026-06-05: Updated registration schema to enforce unique confirmed registrations while allowing re-registration after cancellation.
+- 2026-06-05: Fixed certificate generation to render the registration owner's name instead of whichever user triggered generation.
+- 2026-06-05: Verified backend subset with `javac`; full certificate compile remains Maven/PDFBox-bound.

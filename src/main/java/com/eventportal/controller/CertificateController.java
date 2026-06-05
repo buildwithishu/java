@@ -3,6 +3,7 @@ package com.eventportal.controller;
 import com.eventportal.dao.CertificateDAO;
 import com.eventportal.dao.EventDAO;
 import com.eventportal.dao.RegistrationDAO;
+import com.eventportal.dao.UserDAO;
 import com.eventportal.model.Certificate;
 import com.eventportal.model.Event;
 import com.eventportal.model.Registration;
@@ -21,6 +22,7 @@ public class CertificateController {
     private final CertificateDAO certificateDAO;
     private final RegistrationDAO registrationDAO;
     private final EventDAO eventDAO;
+    private final UserDAO userDAO;
     private final NotificationController notificationController;
     private final SessionManager sessionManager;
     private final AppConfig appConfig;
@@ -29,6 +31,7 @@ public class CertificateController {
             CertificateDAO certificateDAO,
             RegistrationDAO registrationDAO,
             EventDAO eventDAO,
+            UserDAO userDAO,
             NotificationController notificationController,
             SessionManager sessionManager,
             AppConfig appConfig
@@ -36,6 +39,7 @@ public class CertificateController {
         this.certificateDAO = certificateDAO;
         this.registrationDAO = registrationDAO;
         this.eventDAO = eventDAO;
+        this.userDAO = userDAO;
         this.notificationController = notificationController;
         this.sessionManager = sessionManager;
         this.appConfig = appConfig;
@@ -55,8 +59,10 @@ public class CertificateController {
 
         Event event = eventDAO.findById(registration.eventId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + registration.eventId()));
+        User certificateOwner = userDAO.findById(registration.userId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + registration.userId()));
         Path certificatePath = PDFGenerator.generateCertificate(
-                user,
+                certificateOwner,
                 event,
                 registration,
                 Path.of(appConfig.certificatesDirectory())

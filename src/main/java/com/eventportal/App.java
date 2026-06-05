@@ -48,6 +48,7 @@ public class App extends Application {
                 new CertificateDAO(databaseConnection),
                 registrationDAO,
                 eventDAO,
+                userDAO,
                 notificationController,
                 sessionManager,
                 AppConfig.load()
