@@ -2,10 +2,12 @@ package com.eventportal;
 
 import atlantafx.base.theme.PrimerDark;
 import com.eventportal.controller.AuthController;
+import com.eventportal.controller.CertificateController;
 import com.eventportal.controller.DashboardController;
 import com.eventportal.controller.EventController;
 import com.eventportal.controller.NotificationController;
 import com.eventportal.controller.RegistrationController;
+import com.eventportal.dao.CertificateDAO;
 import com.eventportal.dao.DatabaseConnection;
 import com.eventportal.dao.EventDAO;
 import com.eventportal.dao.NotificationDAO;
@@ -13,6 +15,7 @@ import com.eventportal.dao.RegistrationDAO;
 import com.eventportal.dao.UserDAO;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
+import com.eventportal.util.AppConfig;
 import com.eventportal.util.NavigationManager;
 import com.eventportal.util.SessionManager;
 import com.eventportal.view.DashboardPlaceholderView;
@@ -41,6 +44,14 @@ public class App extends Application {
         EventDAO eventDAO = new EventDAO(databaseConnection);
         RegistrationDAO registrationDAO = new RegistrationDAO(databaseConnection);
         NotificationController notificationController = new NotificationController(new NotificationDAO(databaseConnection));
+        CertificateController certificateController = new CertificateController(
+                new CertificateDAO(databaseConnection),
+                registrationDAO,
+                eventDAO,
+                notificationController,
+                sessionManager,
+                AppConfig.load()
+        );
         RegistrationController registrationController = new RegistrationController(
                 registrationDAO,
                 eventDAO,
@@ -60,6 +71,8 @@ public class App extends Application {
                 sessionManager,
                 eventController,
                 registrationController,
+                certificateController,
+                notificationController,
                 dashboardController,
                 user,
                 loginRootHolder[0]
@@ -76,6 +89,8 @@ public class App extends Application {
             SessionManager sessionManager,
             EventController eventController,
             RegistrationController registrationController,
+            CertificateController certificateController,
+            NotificationController notificationController,
             DashboardController dashboardController,
             User user,
             Parent loginRoot
@@ -85,6 +100,8 @@ public class App extends Application {
                     user,
                     eventController,
                     registrationController,
+                    certificateController,
+                    notificationController,
                     navigationManager,
                     sessionManager,
                     loginRoot

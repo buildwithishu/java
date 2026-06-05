@@ -1,6 +1,8 @@
 package com.eventportal.view;
 
+import com.eventportal.controller.CertificateController;
 import com.eventportal.controller.EventController;
+import com.eventportal.controller.NotificationController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
 import com.eventportal.model.User;
@@ -22,14 +24,19 @@ public class StudentDashboardView {
     private final User user;
     private final EventController eventController;
     private final RegistrationController registrationController;
+    private final CertificateController certificateController;
+    private final NotificationController notificationController;
     private final NavigationManager navigationManager;
     private final SessionManager sessionManager;
     private final Parent loginRoot;
+    private BorderPane root;
 
     public StudentDashboardView(
             User user,
             EventController eventController,
             RegistrationController registrationController,
+            CertificateController certificateController,
+            NotificationController notificationController,
             NavigationManager navigationManager,
             SessionManager sessionManager,
             Parent loginRoot
@@ -37,19 +44,21 @@ public class StudentDashboardView {
         this.user = user;
         this.eventController = eventController;
         this.registrationController = registrationController;
+        this.certificateController = certificateController;
+        this.notificationController = notificationController;
         this.navigationManager = navigationManager;
         this.sessionManager = sessionManager;
         this.loginRoot = loginRoot;
     }
 
     public Parent build() {
-        BorderPane root = new BorderPane();
+        root = new BorderPane();
         root.getStyleClass().add("app-root");
         root.setPadding(new Insets(24));
 
         root.setTop(header());
         root.setLeft(sidebar());
-        root.setCenter(content());
+        showUpcomingEvents();
         return root;
     }
 
@@ -69,6 +78,22 @@ public class StudentDashboardView {
     private Parent sidebar() {
         Button browseButton = new Button("Browse Events");
         browseButton.setMaxWidth(Double.MAX_VALUE);
+        browseButton.setOnAction(event -> showUpcomingEvents());
+
+        Button registrationsButton = new Button("My Registrations");
+        registrationsButton.setMaxWidth(Double.MAX_VALUE);
+        registrationsButton.setOnAction(event -> setContent("My Registrations", new MyRegistrationsView(
+                registrationController,
+                certificateController
+        ).build()));
+
+        Button certificatesButton = new Button("Certificates");
+        certificatesButton.setMaxWidth(Double.MAX_VALUE);
+        certificatesButton.setOnAction(event -> setContent("Certificates", new CertificateView(certificateController).build()));
+
+        Button notificationsButton = new Button("Notifications");
+        notificationsButton.setMaxWidth(Double.MAX_VALUE);
+        notificationsButton.setOnAction(event -> setContent("Notifications", new NotificationView(notificationController, user).build()));
 
         Button logoutButton = new Button("Logout");
         logoutButton.setMaxWidth(Double.MAX_VALUE);
@@ -77,17 +102,14 @@ public class StudentDashboardView {
             navigationManager.replace(loginRoot);
         });
 
-        VBox sidebar = new VBox(12, browseButton, logoutButton);
+        VBox sidebar = new VBox(12, browseButton, registrationsButton, certificatesButton, notificationsButton, logoutButton);
         sidebar.getStyleClass().add("sidebar");
         sidebar.setPadding(new Insets(0, 18, 0, 0));
         sidebar.setPrefWidth(180);
         return sidebar;
     }
 
-    private Parent content() {
-        Label sectionTitle = new Label("Upcoming Events");
-        sectionTitle.getStyleClass().add("section-title");
-
+    private void showUpcomingEvents() {
         Parent eventList;
         try {
             List<Event> upcomingEvents = eventController.findUpcomingEvents();
@@ -99,10 +121,16 @@ public class StudentDashboardView {
             errorBox.setAlignment(Pos.CENTER);
             eventList = errorBox;
         }
+        setContent("Upcoming Events", eventList);
+    }
 
-        VBox content = new VBox(14, sectionTitle, eventList);
+    private void setContent(String title, Parent body) {
+        Label sectionTitle = new Label(title);
+        sectionTitle.getStyleClass().add("section-title");
+
+        VBox content = new VBox(14, sectionTitle, body);
         content.getStyleClass().add("content-panel-wide");
         content.setPadding(new Insets(20));
-        return content;
+        root.setCenter(content);
     }
 }
