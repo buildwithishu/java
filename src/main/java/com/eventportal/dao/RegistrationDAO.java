@@ -92,6 +92,18 @@ public class RegistrationDAO {
         return findMany(sql, userId);
     }
 
+    public Optional<Registration> findById(long registrationId) throws SQLException {
+        String sql = """
+                SELECT id, user_id, event_id, registration_date, unique_reg_id, status
+                FROM registrations
+                WHERE id = ?
+                """;
+
+        try (Connection connection = databaseConnection.getConnection()) {
+            return findById(connection, sql, registrationId);
+        }
+    }
+
     public List<Registration> findByEvent(long eventId) throws SQLException {
         String sql = """
                 SELECT id, user_id, event_id, registration_date, unique_reg_id, status

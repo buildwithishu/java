@@ -17,9 +17,9 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Database schema | In progress | Core tables, constraints, indexes, admin seed, and sample seed data added |
 | Models | In progress | Immutable records and enums added |
 | DAO layer | In progress | User, event, registration, certificate, and notification DAOs added |
-| Controller/service layer | In progress | Auth, event, registration, and notification controller foundations added |
+| Controller/service layer | In progress | Auth, event, registration, notification, and certificate controller foundations added |
 | JavaFX views | Not started | Login, dashboards, event screens, certificates, notifications |
-| Utilities | In progress | Validation, date/time, session, and password helpers added |
+| Utilities | In progress | Validation, date/time, session, password, and PDF certificate helpers added |
 | CI/CD | Not started | GitHub Actions for CI, release, Docker build |
 | Documentation | Not started | README, contributing, PR template |
 
@@ -44,3 +44,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified expanded DAO/backend subset compilation with `javac`; full Maven tests still blocked by missing `mvn`.
 - 2026-06-05: Added RegistrationController and NotificationController for student registration, cancellation, admin registration lookup, and notifications.
 - 2026-06-05: Verified registration/notification controller source compilation with dependency-free backend subset using `javac`.
+- 2026-06-05: Added PDF certificate generation utility and CertificateController for generating and saving certificate records.
+- 2026-06-05: Verified non-PDFBox backend subset with `javac`; full Maven/PDFBox verification is blocked because local `mvn` is missing and Docker daemon is unavailable.
