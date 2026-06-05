@@ -18,7 +18,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Models | In progress | Immutable records and enums added |
 | DAO layer | In progress | User, event, registration, certificate, and notification DAOs added |
 | Controller/service layer | In progress | Auth, event, registration, notification, certificate, and dashboard controller foundations added |
-| JavaFX views | In progress | Login/register views and dashboard placeholder added |
+| JavaFX views | In progress | Login/register, student dashboard, event list, and dashboard placeholder added |
 | Utilities | In progress | Validation, date/time, session, navigation, password, and PDF certificate helpers added |
 | CI/CD | In progress | CI workflow added; release and Docker build workflows pending |
 | Documentation | Not started | README, contributing, PR template |
@@ -51,3 +51,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Added GitHub Actions CI workflow with JDK 21, PostgreSQL service, Maven test/package, and artifact uploads.
 - 2026-06-05: Added JavaFX navigation manager, login/register views, dashboard placeholder, app wiring, and CSS.
 - 2026-06-05: Verification note: JavaFX UI compile/test remains blocked locally because `mvn` is missing and Docker daemon is unavailable.
+- 2026-06-05: Added student dashboard and event list view with registration action wiring.
+- 2026-06-05: Verification note: student dashboard UI depends on JavaFX/Maven; local `mvn` and Docker daemon remain unavailable.

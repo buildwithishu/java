@@ -11,6 +11,24 @@
     -fx-max-width: 560;
 }
 
+.content-panel-wide {
+    -fx-background-color: #1f2937;
+    -fx-border-color: #374151;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.sidebar {
+    -fx-background-color: transparent;
+}
+
+.event-card {
+    -fx-background-color: #111827;
+    -fx-border-color: #374151;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
 .screen-title {
     -fx-font-size: 28;
     -fx-font-weight: 700;
@@ -21,6 +39,32 @@
     -fx-text-fill: #cbd5e1;
     -fx-wrap-text: true;
     -fx-text-alignment: center;
+}
+
+.section-title {
+    -fx-font-size: 20;
+    -fx-font-weight: 700;
+    -fx-text-fill: #f9fafb;
+}
+
+.card-title {
+    -fx-font-size: 16;
+    -fx-font-weight: 700;
+    -fx-text-fill: #f9fafb;
+}
+
+.badge {
+    -fx-text-fill: #93c5fd;
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+}
+
+.transparent-scroll {
+    -fx-background-color: transparent;
+}
+
+.transparent-scroll > .viewport {
+    -fx-background-color: transparent;
 }
 
 .error-text {
