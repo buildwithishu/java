@@ -91,7 +91,15 @@ public class AdminEventManagementView {
         cancelButton.setDisable(event.status().name().equals("CANCELLED"));
         cancelButton.setOnAction(action -> cancelEvent(event.id(), listContainer));
 
-        HBox row = new HBox(12, text, cancelButton);
+        Button ongoingButton = new Button("Start");
+        ongoingButton.setDisable(!event.status().name().equals("UPCOMING"));
+        ongoingButton.setOnAction(action -> changeStatus(event.id(), "ONGOING", listContainer));
+
+        Button completeButton = new Button("Complete");
+        completeButton.setDisable(event.status().name().equals("COMPLETED") || event.status().name().equals("CANCELLED"));
+        completeButton.setOnAction(action -> changeStatus(event.id(), "COMPLETED", listContainer));
+
+        HBox row = new HBox(12, text, ongoingButton, completeButton, cancelButton);
         row.getStyleClass().add("event-card");
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(14));
@@ -104,6 +112,21 @@ public class AdminEventManagementView {
             refreshEvents(listContainer);
         } catch (SQLException exception) {
             listContainer.getChildren().add(errorLabel("Unable to cancel event. Database unavailable."));
+        } catch (RuntimeException exception) {
+            listContainer.getChildren().add(errorLabel(exception.getMessage()));
+        }
+    }
+
+    private void changeStatus(long eventId, String status, VBox listContainer) {
+        try {
+            if ("ONGOING".equals(status)) {
+                eventController.markOngoing(eventId);
+            } else {
+                eventController.markCompleted(eventId);
+            }
+            refreshEvents(listContainer);
+        } catch (SQLException exception) {
+            listContainer.getChildren().add(errorLabel("Unable to update event. Database unavailable."));
         } catch (RuntimeException exception) {
             listContainer.getChildren().add(errorLabel(exception.getMessage()));
         }

@@ -1,9 +1,11 @@
 package com.eventportal.controller;
 
 import com.eventportal.dao.EventDAO;
+import com.eventportal.dao.RegistrationDAO;
 import com.eventportal.model.Event;
 import com.eventportal.model.EventCategory;
 import com.eventportal.model.EventStatus;
+import com.eventportal.model.Registration;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
 import com.eventportal.util.SessionManager;
@@ -18,10 +20,23 @@ import java.util.List;
 public class EventController {
     private final EventDAO eventDAO;
     private final SessionManager sessionManager;
+    private final RegistrationDAO registrationDAO;
+    private final NotificationController notificationController;
 
     public EventController(EventDAO eventDAO, SessionManager sessionManager) {
+        this(eventDAO, sessionManager, null, null);
+    }
+
+    public EventController(
+            EventDAO eventDAO,
+            SessionManager sessionManager,
+            RegistrationDAO registrationDAO,
+            NotificationController notificationController
+    ) {
         this.eventDAO = eventDAO;
         this.sessionManager = sessionManager;
+        this.registrationDAO = registrationDAO;
+        this.notificationController = notificationController;
     }
 
     public Event createEvent(
@@ -99,7 +114,16 @@ public class EventController {
         );
 
         eventDAO.updateEvent(cancelled);
+        notifyEventCancellation(cancelled);
         return true;
+    }
+
+    public Event markOngoing(long eventId) throws SQLException {
+        return changeStatus(eventId, EventStatus.ONGOING);
+    }
+
+    public Event markCompleted(long eventId) throws SQLException {
+        return changeStatus(eventId, EventStatus.COMPLETED);
     }
 
     public List<Event> findAllEvents() throws SQLException {
@@ -115,6 +139,48 @@ public class EventController {
             return eventDAO.findAll();
         }
         return eventDAO.searchByKeyword(keyword.trim());
+    }
+
+    private Event changeStatus(long eventId, EventStatus nextStatus) throws SQLException {
+        requireAdmin();
+        Event event = eventDAO.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+        if (event.status() == EventStatus.CANCELLED) {
+            throw new IllegalArgumentException("Cancelled events cannot change status");
+        }
+        Event updated = new Event(
+                event.id(),
+                event.title(),
+                event.description(),
+                event.category(),
+                event.venue(),
+                event.eventDate(),
+                event.startTime(),
+                event.endTime(),
+                event.capacity(),
+                event.registeredCount(),
+                nextStatus,
+                event.createdBy(),
+                event.createdAt(),
+                OffsetDateTime.now()
+        );
+        return eventDAO.updateEvent(updated);
+    }
+
+    private void notifyEventCancellation(Event event) throws SQLException {
+        if (registrationDAO == null || notificationController == null) {
+            return;
+        }
+        for (Registration registration : registrationDAO.findByEvent(event.id())) {
+            if (registration.isActive()) {
+                notificationController.createNotification(
+                        registration.userId(),
+                        "Event Cancelled",
+                        event.title() + " has been cancelled.",
+                        event.id()
+                );
+            }
+        }
     }
 
     private User requireAdmin() {

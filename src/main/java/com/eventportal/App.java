@@ -59,7 +59,12 @@ public class App extends Application {
                 notificationController,
                 sessionManager
         );
-        EventController eventController = new EventController(eventDAO, sessionManager);
+        EventController eventController = new EventController(
+                eventDAO,
+                sessionManager,
+                registrationDAO,
+                notificationController
+        );
         DashboardController dashboardController = new DashboardController(eventDAO, registrationDAO, userDAO);
         AuthController authController = new AuthController(
                 userDAO,
