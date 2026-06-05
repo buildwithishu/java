@@ -65,4 +65,11 @@ public class NotificationController {
     public int countUnread(long userId) throws SQLException {
         return notificationDAO.countUnread(userId);
     }
+
+    public int deleteOldNotifications(int daysOld) throws SQLException {
+        if (daysOld < 1) {
+            throw new IllegalArgumentException("daysOld must be greater than zero");
+        }
+        return notificationDAO.deleteOld(daysOld);
+    }
 }

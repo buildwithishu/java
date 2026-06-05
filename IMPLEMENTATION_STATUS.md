@@ -72,3 +72,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verification note: admin report UI depends on JavaFX/Maven; local `mvn` remains unavailable.
 - 2026-06-05: Added event status transitions and cancellation notifications for active registrants.
 - 2026-06-05: Verified event lifecycle backend subset with `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
+- 2026-06-05: Hardened certificate-ready notifications to avoid duplicates and added validated old-notification cleanup.
+- 2026-06-05: Verified notification hardening backend subset with `javac`; full Maven/PDFBox verification remains blocked by missing `mvn`.

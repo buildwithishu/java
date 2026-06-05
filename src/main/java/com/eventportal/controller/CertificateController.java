@@ -61,6 +61,7 @@ public class CertificateController {
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + registration.eventId()));
         User certificateOwner = userDAO.findById(registration.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + registration.userId()));
+        boolean alreadyGenerated = certificateDAO.findByRegistration(registration.id()).isPresent();
         Path certificatePath = PDFGenerator.generateCertificate(
                 certificateOwner,
                 event,
@@ -69,7 +70,9 @@ public class CertificateController {
         );
 
         Certificate certificate = certificateDAO.saveCertificate(registration.id(), certificatePath.toString());
-        notificationController.createCertificateReady(registration.userId(), event.id(), event.title());
+        if (!alreadyGenerated) {
+            notificationController.createCertificateReady(registration.userId(), event.id(), event.title());
+        }
         return certificate;
     }
 
