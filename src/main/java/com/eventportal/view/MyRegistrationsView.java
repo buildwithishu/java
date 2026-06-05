@@ -2,7 +2,7 @@ package com.eventportal.view;
 
 import com.eventportal.controller.CertificateController;
 import com.eventportal.controller.RegistrationController;
-import com.eventportal.model.Registration;
+import com.eventportal.model.RegistrationDetail;
 import com.eventportal.util.DateTimeUtil;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -40,12 +40,12 @@ public class MyRegistrationsView {
     private void refresh(VBox list) {
         list.getChildren().clear();
         try {
-            List<Registration> registrations = registrationController.findMyRegistrations();
+            List<RegistrationDetail> registrations = registrationController.findMyRegistrationDetails();
             if (registrations.isEmpty()) {
                 list.getChildren().add(emptyLabel("You have not registered for any events yet."));
                 return;
             }
-            for (Registration registration : registrations) {
+            for (RegistrationDetail registration : registrations) {
                 list.getChildren().add(registrationCard(registration, list));
             }
         } catch (SQLException exception) {
@@ -53,11 +53,11 @@ public class MyRegistrationsView {
         }
     }
 
-    private Parent registrationCard(Registration registration, VBox list) {
-        Label title = new Label(registration.uniqueRegId());
+    private Parent registrationCard(RegistrationDetail registration, VBox list) {
+        Label title = new Label(registration.eventTitle());
         title.getStyleClass().add("card-title");
 
-        Label details = new Label("Event #" + registration.eventId() + " • " + DateTimeUtil.formatDate(registration.registrationDate().toLocalDate()) + " • " + registration.status());
+        Label details = new Label(DateTimeUtil.formatDate(registration.eventDate()) + " • " + registration.venue() + " • " + registration.uniqueRegId() + " • " + registration.status());
         details.getStyleClass().add("muted-text");
 
         Label message = new Label();
@@ -65,11 +65,11 @@ public class MyRegistrationsView {
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setDisable(!registration.isActive());
-        cancelButton.setOnAction(event -> cancelRegistration(registration.id(), list, message));
+        cancelButton.setOnAction(event -> cancelRegistration(registration.registrationId(), list, message));
 
         Button certificateButton = new Button("Generate Certificate");
         certificateButton.setDisable(!registration.isActive());
-        certificateButton.setOnAction(event -> generateCertificate(registration.id(), message));
+        certificateButton.setOnAction(event -> generateCertificate(registration.registrationId(), message));
 
         VBox text = new VBox(4, title, details, message);
         HBox.setHgrow(text, Priority.ALWAYS);

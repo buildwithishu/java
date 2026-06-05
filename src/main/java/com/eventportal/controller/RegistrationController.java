@@ -4,6 +4,7 @@ import com.eventportal.dao.EventDAO;
 import com.eventportal.dao.RegistrationDAO;
 import com.eventportal.model.Event;
 import com.eventportal.model.Registration;
+import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
 import com.eventportal.util.SessionManager;
@@ -65,6 +66,11 @@ public class RegistrationController {
     public List<Registration> findMyRegistrations() throws SQLException {
         User student = requireStudent();
         return registrationDAO.findByUser(student.id());
+    }
+
+    public List<RegistrationDetail> findMyRegistrationDetails() throws SQLException {
+        User student = requireStudent();
+        return registrationDAO.findDetailsByUser(student.id());
     }
 
     public List<Registration> findRegistrationsForEvent(long eventId) throws SQLException {

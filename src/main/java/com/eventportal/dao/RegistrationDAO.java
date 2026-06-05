@@ -1,6 +1,7 @@
 package com.eventportal.dao;
 
 import com.eventportal.model.Registration;
+import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.RegistrationStatus;
 
 import java.sql.Connection;
@@ -90,6 +91,35 @@ public class RegistrationDAO {
                 ORDER BY registration_date DESC
                 """;
         return findMany(sql, userId);
+    }
+
+    public List<RegistrationDetail> findDetailsByUser(long userId) throws SQLException {
+        String sql = """
+                SELECT r.id,
+                       r.event_id,
+                       r.registration_date,
+                       r.unique_reg_id,
+                       r.status,
+                       e.title AS event_title,
+                       e.event_date,
+                       e.venue
+                FROM registrations r
+                JOIN events e ON e.id = r.event_id
+                WHERE r.user_id = ?
+                ORDER BY r.registration_date DESC
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<RegistrationDetail> registrations = new ArrayList<>();
+                while (resultSet.next()) {
+                    registrations.add(mapRegistrationDetail(resultSet));
+                }
+                return registrations;
+            }
+        }
     }
 
     public Optional<Registration> findById(long registrationId) throws SQLException {
@@ -250,6 +280,19 @@ public class RegistrationDAO {
                 resultSet.getObject("registration_date", OffsetDateTime.class),
                 resultSet.getString("unique_reg_id"),
                 RegistrationStatus.valueOf(resultSet.getString("status"))
+        );
+    }
+
+    static RegistrationDetail mapRegistrationDetail(ResultSet resultSet) throws SQLException {
+        return new RegistrationDetail(
+                resultSet.getLong("id"),
+                resultSet.getLong("event_id"),
+                resultSet.getString("unique_reg_id"),
+                RegistrationStatus.valueOf(resultSet.getString("status")),
+                resultSet.getObject("registration_date", OffsetDateTime.class),
+                resultSet.getString("event_title"),
+                resultSet.getDate("event_date").toLocalDate(),
+                resultSet.getString("venue")
         );
     }
 }

@@ -61,3 +61,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Added GitHub Actions release and Docker image build workflows.
 - 2026-06-05: Added student registrations, certificates, and notifications views and wired sidebar navigation.
 - 2026-06-05: Verification note: student registrations/certificates/notifications UI depends on JavaFX/Maven; local `mvn` remains unavailable.
+- 2026-06-05: Added registration detail model/query so student registration cards show event title, date, and venue.
+- 2026-06-05: Verified registration detail backend subset with `javac`; full Maven/UI verification remains blocked by missing `mvn`.
