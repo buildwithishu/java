@@ -13,7 +13,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Area | Status | Notes |
 |------|--------|-------|
 | Maven project skeleton | In progress | Java 17+, JavaFX 21, Maven packaging scaffolded |
-| Docker local database | Not started | PostgreSQL 16 and pgAdmin via Compose |
+| Docker local database | In progress | Compose, test Compose, Dockerfile, env template, and Makefile added |
 | Database schema | In progress | Core tables, constraints, indexes, admin seed, and sample seed data added |
 | Models | Not started | Domain entities and enums |
 | DAO layer | Not started | JDBC persistence and tests |
@@ -29,3 +29,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Added Maven/JavaFX baseline with launcher, config resource, and smoke test.
 - 2026-06-05: Verification note: Java 21 is installed; `mvn test` could not run because `mvn` is not installed.
 - 2026-06-05: Added PostgreSQL schema and seed data for users, events, registrations, certificates, and notifications.
+- 2026-06-05: Added Docker-first local database setup, test database Compose file, Dockerfile, env example, and Makefile.

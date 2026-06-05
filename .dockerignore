@@ -1,0 +1,14 @@
+target/
+.git/
+.github/
+*.md
+.env
+.idea/
+*.iml
+.vscode/
+certificates/
+postgres_data/
+pgadmin_data/
+.agents/
+.codex/
+skills-lock.json
