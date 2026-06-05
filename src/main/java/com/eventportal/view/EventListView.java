@@ -2,7 +2,9 @@ package com.eventportal.view;
 
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
+import com.eventportal.model.User;
 import com.eventportal.util.DateTimeUtil;
+import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -19,10 +21,19 @@ import java.util.List;
 
 public class EventListView {
     private final RegistrationController registrationController;
+    private final NavigationManager navigationManager;
+    private final User currentUser;
     private final List<Event> events;
 
-    public EventListView(RegistrationController registrationController, List<Event> events) {
+    public EventListView(
+            RegistrationController registrationController,
+            NavigationManager navigationManager,
+            User currentUser,
+            List<Event> events
+    ) {
         this.registrationController = registrationController;
+        this.navigationManager = navigationManager;
+        this.currentUser = currentUser;
         this.events = List.copyOf(events);
     }
 
@@ -70,7 +81,15 @@ public class EventListView {
         registerButton.setDisable(!event.hasAvailableSeats());
         registerButton.setOnAction(action -> register(event, registerButton, message));
 
-        HBox footer = new HBox(12, capacity, registerButton);
+        Button detailsButton = new Button("View Details");
+        detailsButton.setOnAction(action -> navigationManager.show(new EventDetailView(
+                event,
+                currentUser,
+                registrationController,
+                navigationManager
+        ).build()));
+
+        HBox footer = new HBox(12, capacity, detailsButton, registerButton);
         footer.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(capacity, Priority.ALWAYS);
 

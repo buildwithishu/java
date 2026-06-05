@@ -117,7 +117,7 @@ public class StudentDashboardView {
         Parent eventList;
         try {
             List<Event> upcomingEvents = eventController.findUpcomingEvents();
-            eventList = new EventListView(registrationController, upcomingEvents).build();
+            eventList = new EventListView(registrationController, navigationManager, user, upcomingEvents).build();
         } catch (SQLException exception) {
             Label error = new Label("Unable to load events. Start PostgreSQL and try again.");
             error.getStyleClass().add("error-text");

@@ -2,6 +2,7 @@ package com.eventportal.view;
 
 import com.eventportal.controller.DashboardController;
 import com.eventportal.controller.EventController;
+import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.CategoryStat;
 import com.eventportal.model.DashboardSummary;
 import com.eventportal.model.PopularEventStat;
@@ -23,6 +24,7 @@ public class AdminDashboardView {
     private final User user;
     private final DashboardController dashboardController;
     private final EventController eventController;
+    private final RegistrationController registrationController;
     private final NavigationManager navigationManager;
     private final SessionManager sessionManager;
     private final Parent loginRoot;
@@ -31,6 +33,7 @@ public class AdminDashboardView {
             User user,
             DashboardController dashboardController,
             EventController eventController,
+            RegistrationController registrationController,
             NavigationManager navigationManager,
             SessionManager sessionManager,
             Parent loginRoot
@@ -38,6 +41,7 @@ public class AdminDashboardView {
         this.user = user;
         this.dashboardController = dashboardController;
         this.eventController = eventController;
+        this.registrationController = registrationController;
         this.navigationManager = navigationManager;
         this.sessionManager = sessionManager;
         this.loginRoot = loginRoot;
@@ -61,7 +65,12 @@ public class AdminDashboardView {
 
         Button manageEventsButton = new Button("Manage Events");
         manageEventsButton.getStyleClass().add("primary-action");
-        manageEventsButton.setOnAction(event -> navigationManager.show(new AdminEventManagementView(eventController, navigationManager).build()));
+        manageEventsButton.setOnAction(event -> navigationManager.show(new AdminEventManagementView(
+                eventController,
+                registrationController,
+                user,
+                navigationManager
+        ).build()));
 
         Button reportsButton = new Button("View Reports");
         reportsButton.setOnAction(event -> navigationManager.show(new AdminReportView(dashboardController, navigationManager).build()));

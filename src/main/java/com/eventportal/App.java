@@ -120,6 +120,7 @@ public class App extends Application {
                     user,
                     dashboardController,
                     eventController,
+                    registrationController,
                     navigationManager,
                     sessionManager,
                     loginRoot

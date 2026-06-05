@@ -1,7 +1,9 @@
 package com.eventportal.view;
 
 import com.eventportal.controller.EventController;
+import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
+import com.eventportal.model.User;
 import com.eventportal.util.DateTimeUtil;
 import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
@@ -19,10 +21,19 @@ import java.util.List;
 
 public class AdminEventManagementView {
     private final EventController eventController;
+    private final RegistrationController registrationController;
+    private final User currentUser;
     private final NavigationManager navigationManager;
 
-    public AdminEventManagementView(EventController eventController, NavigationManager navigationManager) {
+    public AdminEventManagementView(
+            EventController eventController,
+            RegistrationController registrationController,
+            User currentUser,
+            NavigationManager navigationManager
+    ) {
         this.eventController = eventController;
+        this.registrationController = registrationController;
+        this.currentUser = currentUser;
         this.navigationManager = navigationManager;
     }
 
@@ -99,7 +110,15 @@ public class AdminEventManagementView {
         completeButton.setDisable(event.status().name().equals("COMPLETED") || event.status().name().equals("CANCELLED"));
         completeButton.setOnAction(action -> changeStatus(event.id(), "COMPLETED", listContainer));
 
-        HBox row = new HBox(12, text, ongoingButton, completeButton, cancelButton);
+        Button detailsButton = new Button("Details");
+        detailsButton.setOnAction(action -> navigationManager.show(new EventDetailView(
+                event,
+                currentUser,
+                registrationController,
+                navigationManager
+        ).build()));
+
+        HBox row = new HBox(12, text, detailsButton, ongoingButton, completeButton, cancelButton);
         row.getStyleClass().add("event-card");
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(14));
