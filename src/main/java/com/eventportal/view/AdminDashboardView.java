@@ -63,9 +63,14 @@ public class AdminDashboardView {
         manageEventsButton.getStyleClass().add("primary-action");
         manageEventsButton.setOnAction(event -> navigationManager.show(new AdminEventManagementView(eventController, navigationManager).build()));
 
+        Button reportsButton = new Button("View Reports");
+        reportsButton.setOnAction(event -> navigationManager.show(new AdminReportView(dashboardController, navigationManager).build()));
+
         Parent body = dashboardBody();
 
-        VBox root = new VBox(20, header, manageEventsButton, body);
+        HBox actions = new HBox(12, manageEventsButton, reportsButton);
+
+        VBox root = new VBox(20, header, actions, body);
         root.getStyleClass().add("app-root");
         root.setPadding(new Insets(24));
         return root;

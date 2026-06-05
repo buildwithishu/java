@@ -18,7 +18,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Models | In progress | Immutable records and enums added |
 | DAO layer | In progress | User, event, registration, certificate, and notification DAOs added |
 | Controller/service layer | In progress | Auth, event, registration, notification, certificate, and dashboard controller foundations added |
-| JavaFX views | In progress | Login/register, student dashboard, admin dashboard, event list, registrations, certificates, notifications, profile, admin event management, and dashboard placeholder added |
+| JavaFX views | In progress | Login/register, student dashboard, admin dashboard, event list, registrations, certificates, notifications, profile, admin event management, reports, and dashboard placeholder added |
 | Utilities | In progress | Validation, date/time, session, navigation, password, and PDF certificate helpers added |
 | CI/CD | In progress | CI, release, and Docker build workflows added |
 | Documentation | In progress | README, contributing guide, and PR template added |
@@ -68,3 +68,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified backend subset with `javac`; full certificate compile remains Maven/PDFBox-bound.
 - 2026-06-05: Added student profile view and sidebar route.
 - 2026-06-05: Verification note: profile UI depends on JavaFX/Maven; local `mvn` remains unavailable.
+- 2026-06-05: Added admin report view with dashboard summary text output.
+- 2026-06-05: Verification note: admin report UI depends on JavaFX/Maven; local `mvn` remains unavailable.
