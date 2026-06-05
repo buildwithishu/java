@@ -16,7 +16,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Docker local database | In progress | Compose, test Compose, Dockerfile, env template, and Makefile added |
 | Database schema | In progress | Core tables, constraints, indexes, admin seed, and sample seed data added |
 | Models | In progress | Immutable records and enums added |
-| DAO layer | Not started | JDBC persistence and tests |
+| DAO layer | In progress | Configuration loader and database connection manager added |
 | Controller/service layer | Not started | Auth, events, registrations, certificates, notifications, dashboards |
 | JavaFX views | Not started | Login, dashboards, event screens, certificates, notifications |
 | Utilities | In progress | Validation and date/time helpers added |
@@ -32,3 +32,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Added Docker-first local database setup, test database Compose file, Dockerfile, env example, and Makefile.
 - 2026-06-05: Added initial immutable domain models, enums, validation utilities, date/time helpers, and validation tests.
 - 2026-06-05: Verified model/util source compilation with `javac`; full Maven tests still blocked by missing `mvn`.
+- 2026-06-05: Added environment-aware app configuration loader and JDBC connection manager with config tests.
+- 2026-06-05: Verified model/util/DAO foundation source compilation with `javac`; full Maven tests still blocked by missing `mvn`.
