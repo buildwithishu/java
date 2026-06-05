@@ -63,3 +63,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verification note: student registrations/certificates/notifications UI depends on JavaFX/Maven; local `mvn` remains unavailable.
 - 2026-06-05: Added registration detail model/query so student registration cards show event title, date, and venue.
 - 2026-06-05: Verified registration detail backend subset with `javac`; full Maven/UI verification remains blocked by missing `mvn`.
+- 2026-06-05: Updated registration schema to enforce unique confirmed registrations while allowing re-registration after cancellation.

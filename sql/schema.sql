@@ -34,8 +34,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     event_id BIGINT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
     registration_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     unique_reg_id VARCHAR(40) NOT NULL UNIQUE,
-    status VARCHAR(30) NOT NULL DEFAULT 'CONFIRMED' CHECK (status IN ('CONFIRMED', 'CANCELLED')),
-    CONSTRAINT registrations_unique_active UNIQUE (user_id, event_id)
+    status VARCHAR(30) NOT NULL DEFAULT 'CONFIRMED' CHECK (status IN ('CONFIRMED', 'CANCELLED'))
 );
 
 CREATE TABLE IF NOT EXISTS certificates (
@@ -60,6 +59,9 @@ CREATE INDEX IF NOT EXISTS idx_events_status ON events(status);
 CREATE INDEX IF NOT EXISTS idx_events_event_date ON events(event_date);
 CREATE INDEX IF NOT EXISTS idx_registrations_user_id ON registrations(user_id);
 CREATE INDEX IF NOT EXISTS idx_registrations_event_id ON registrations(event_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_registrations_unique_confirmed
+    ON registrations(user_id, event_id)
+    WHERE status = 'CONFIRMED';
 CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at);
 
