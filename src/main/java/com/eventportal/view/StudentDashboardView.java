@@ -95,6 +95,10 @@ public class StudentDashboardView {
         notificationsButton.setMaxWidth(Double.MAX_VALUE);
         notificationsButton.setOnAction(event -> setContent("Notifications", new NotificationView(notificationController, user).build()));
 
+        Button profileButton = new Button("Profile");
+        profileButton.setMaxWidth(Double.MAX_VALUE);
+        profileButton.setOnAction(event -> setContent("Profile", new ProfileView(user).build()));
+
         Button logoutButton = new Button("Logout");
         logoutButton.setMaxWidth(Double.MAX_VALUE);
         logoutButton.setOnAction(event -> {
@@ -102,7 +106,7 @@ public class StudentDashboardView {
             navigationManager.replace(loginRoot);
         });
 
-        VBox sidebar = new VBox(12, browseButton, registrationsButton, certificatesButton, notificationsButton, logoutButton);
+        VBox sidebar = new VBox(12, browseButton, registrationsButton, certificatesButton, notificationsButton, profileButton, logoutButton);
         sidebar.getStyleClass().add("sidebar");
         sidebar.setPadding(new Insets(0, 18, 0, 0));
         sidebar.setPrefWidth(180);
