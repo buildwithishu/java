@@ -76,3 +76,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified notification hardening backend subset with `javac`; full Maven/PDFBox verification remains blocked by missing `mvn`.
 - 2026-06-05: Added Unix Maven bootstrapper script so the project can run Maven without a preinstalled `mvn`.
 - 2026-06-05: Verification note: `./mvnw -v` could not complete because Maven binary download from Apache archive stalled in this environment.
+- 2026-06-05: Added model invariant tests for Event and RegistrationDetail.
+- 2026-06-05: Verified main model source compilation with `javac`; JUnit execution remains Maven-bound.
