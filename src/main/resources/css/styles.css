@@ -53,6 +53,12 @@
     -fx-text-fill: #f9fafb;
 }
 
+.stat-value {
+    -fx-font-size: 30;
+    -fx-font-weight: 800;
+    -fx-text-fill: #f9fafb;
+}
+
 .badge {
     -fx-text-fill: #93c5fd;
     -fx-font-size: 12;

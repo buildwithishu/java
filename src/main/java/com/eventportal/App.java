@@ -2,6 +2,7 @@ package com.eventportal;
 
 import atlantafx.base.theme.PrimerDark;
 import com.eventportal.controller.AuthController;
+import com.eventportal.controller.DashboardController;
 import com.eventportal.controller.EventController;
 import com.eventportal.controller.NotificationController;
 import com.eventportal.controller.RegistrationController;
@@ -16,6 +17,7 @@ import com.eventportal.util.NavigationManager;
 import com.eventportal.util.SessionManager;
 import com.eventportal.view.DashboardPlaceholderView;
 import com.eventportal.view.LoginView;
+import com.eventportal.view.AdminDashboardView;
 import com.eventportal.view.StudentDashboardView;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -37,14 +39,16 @@ public class App extends Application {
         DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
         UserDAO userDAO = new UserDAO(databaseConnection);
         EventDAO eventDAO = new EventDAO(databaseConnection);
+        RegistrationDAO registrationDAO = new RegistrationDAO(databaseConnection);
         NotificationController notificationController = new NotificationController(new NotificationDAO(databaseConnection));
         RegistrationController registrationController = new RegistrationController(
-                new RegistrationDAO(databaseConnection),
+                registrationDAO,
                 eventDAO,
                 notificationController,
                 sessionManager
         );
         EventController eventController = new EventController(eventDAO, sessionManager);
+        DashboardController dashboardController = new DashboardController(eventDAO, registrationDAO, userDAO);
         AuthController authController = new AuthController(
                 userDAO,
                 sessionManager
@@ -56,6 +60,7 @@ public class App extends Application {
                 sessionManager,
                 eventController,
                 registrationController,
+                dashboardController,
                 user,
                 loginRootHolder[0]
         ));
@@ -71,6 +76,7 @@ public class App extends Application {
             SessionManager sessionManager,
             EventController eventController,
             RegistrationController registrationController,
+            DashboardController dashboardController,
             User user,
             Parent loginRoot
     ) {
@@ -79,6 +85,16 @@ public class App extends Application {
                     user,
                     eventController,
                     registrationController,
+                    navigationManager,
+                    sessionManager,
+                    loginRoot
+            ).build());
+            return;
+        }
+        if (user.role() == Role.ADMIN) {
+            navigationManager.replace(new AdminDashboardView(
+                    user,
+                    dashboardController,
                     navigationManager,
                     sessionManager,
                     loginRoot
