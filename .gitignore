@@ -1,0 +1,24 @@
+# Build
+target/
+*.jar
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.project
+.classpath
+.settings/
+
+# Environment
+.env
+certificates/*.pdf
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+postgres_data/
+pgadmin_data/

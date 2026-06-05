@@ -12,7 +12,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Maven project skeleton | Not started | Java 17+, JavaFX 21, Maven packaging |
+| Maven project skeleton | In progress | Java 17+, JavaFX 21, Maven packaging scaffolded |
 | Docker local database | Not started | PostgreSQL 16 and pgAdmin via Compose |
 | Database schema | Not started | Users, events, registrations, certificates, notifications |
 | Models | Not started | Domain entities and enums |
@@ -26,3 +26,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 ## Implementation Log
 
 - 2026-06-05: Started product implementation tracking.
+- 2026-06-05: Added Maven/JavaFX baseline with launcher, config resource, and smoke test.
+- 2026-06-05: Verification note: Java 21 is installed; `mvn test` could not run because `mvn` is not installed.
