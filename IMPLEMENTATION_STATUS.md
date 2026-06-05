@@ -16,7 +16,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Docker local database | In progress | Compose, test Compose, Dockerfile, env template, and Makefile added |
 | Database schema | In progress | Core tables, constraints, indexes, admin seed, and sample seed data added |
 | Models | In progress | Immutable records and enums added |
-| DAO layer | In progress | Configuration loader, database connection manager, UserDAO, and EventDAO added |
+| DAO layer | In progress | User, event, registration, certificate, and notification DAOs added |
 | Controller/service layer | In progress | Auth and event controller foundations added |
 | JavaFX views | Not started | Login, dashboards, event screens, certificates, notifications |
 | Utilities | In progress | Validation, date/time, session, and password helpers added |
@@ -40,3 +40,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified dependency-free backend subset with `javac`; BCrypt-backed auth requires Maven for full compile/test.
 - 2026-06-05: Added EventController with admin-only event creation, updates, cancellation, search, and validation.
 - 2026-06-05: Verified EventController source compilation with dependency-free backend subset using `javac`.
+- 2026-06-05: Added RegistrationDAO, CertificateDAO, and NotificationDAO with prepared statements and transactional registration count updates.
+- 2026-06-05: Verified expanded DAO/backend subset compilation with `javac`; full Maven tests still blocked by missing `mvn`.
