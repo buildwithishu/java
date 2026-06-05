@@ -3,6 +3,7 @@ package com.eventportal.view;
 import com.eventportal.controller.DashboardController;
 import com.eventportal.model.CategoryStat;
 import com.eventportal.model.DashboardSummary;
+import com.eventportal.model.MonthlyRegistrationStat;
 import com.eventportal.model.PopularEventStat;
 import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
@@ -53,6 +54,10 @@ public class AdminReportView {
             builder.append("Events by category\n");
             for (CategoryStat stat : summary.categoryDistribution()) {
                 builder.append("- ").append(stat.category()).append(": ").append(stat.eventCount()).append('\n');
+            }
+            builder.append("\nRegistrations by month\n");
+            for (MonthlyRegistrationStat stat : summary.monthlyRegistrations()) {
+                builder.append("- ").append(stat.month()).append(": ").append(stat.registrationCount()).append('\n');
             }
             builder.append("\nPopular events\n");
             for (PopularEventStat event : summary.popularEvents()) {

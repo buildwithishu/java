@@ -7,7 +7,8 @@ public record DashboardSummary(
         int totalRegistrations,
         int activeStudents,
         List<CategoryStat> categoryDistribution,
-        List<PopularEventStat> popularEvents
+        List<PopularEventStat> popularEvents,
+        List<MonthlyRegistrationStat> monthlyRegistrations
 ) {
     public DashboardSummary {
         if (totalEvents < 0 || totalRegistrations < 0 || activeStudents < 0) {
@@ -15,5 +16,6 @@ public record DashboardSummary(
         }
         categoryDistribution = List.copyOf(categoryDistribution);
         popularEvents = List.copyOf(popularEvents);
+        monthlyRegistrations = List.copyOf(monthlyRegistrations);
     }
 }

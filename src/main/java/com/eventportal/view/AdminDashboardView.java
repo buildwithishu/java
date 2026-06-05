@@ -5,6 +5,7 @@ import com.eventportal.controller.EventController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.CategoryStat;
 import com.eventportal.model.DashboardSummary;
+import com.eventportal.model.MonthlyRegistrationStat;
 import com.eventportal.model.PopularEventStat;
 import com.eventportal.model.User;
 import com.eventportal.util.NavigationManager;
@@ -88,7 +89,13 @@ public class AdminDashboardView {
     private Parent dashboardBody() {
         try {
             DashboardSummary summary = dashboardController.loadAdminSummary();
-            VBox content = new VBox(18, statGrid(summary), categorySection(summary), popularEventsSection(summary));
+            VBox content = new VBox(
+                    18,
+                    statGrid(summary),
+                    categorySection(summary),
+                    monthlyRegistrationSection(summary),
+                    popularEventsSection(summary)
+            );
             content.getStyleClass().add("content-panel-wide");
             content.setPadding(new Insets(20));
             return content;
@@ -139,6 +146,25 @@ public class AdminDashboardView {
         }
         for (PopularEventStat event : summary.popularEvents()) {
             Label row = new Label(event.title() + " — " + event.registeredCount() + " / " + event.capacity());
+            row.getStyleClass().add("muted-text");
+            box.getChildren().add(row);
+        }
+        return box;
+    }
+
+    private static Parent monthlyRegistrationSection(DashboardSummary summary) {
+        VBox box = new VBox(8);
+        Label title = new Label("Registrations by Month");
+        title.getStyleClass().add("section-title");
+        box.getChildren().add(title);
+        if (summary.monthlyRegistrations().isEmpty()) {
+            Label empty = new Label("No registrations yet.");
+            empty.getStyleClass().add("muted-text");
+            box.getChildren().add(empty);
+            return box;
+        }
+        for (MonthlyRegistrationStat stat : summary.monthlyRegistrations()) {
+            Label row = new Label(stat.month() + ": " + stat.registrationCount());
             row.getStyleClass().add("muted-text");
             box.getChildren().add(row);
         }

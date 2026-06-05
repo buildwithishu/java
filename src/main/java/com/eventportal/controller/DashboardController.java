@@ -36,7 +36,8 @@ public class DashboardController {
                 registrationDAO.countConfirmed(),
                 userDAO.countByRole(Role.STUDENT),
                 buildCategoryDistribution(events),
-                buildPopularEvents(events)
+                buildPopularEvents(events),
+                registrationDAO.countConfirmedByMonth()
         );
     }
 

@@ -93,3 +93,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified notification timestamp model/util path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
 - 2026-06-05: Added admin event edit form mode and safe delete action for events without registrations.
 - 2026-06-05: Verified admin event delete controller path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
+- 2026-06-05: Added registrations-by-month dashboard aggregate and admin report/dashboard display.
+- 2026-06-05: Verified dashboard monthly registration backend path with dependency-free `javac`; JUnit execution remains Maven-bound.

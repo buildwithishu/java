@@ -3,6 +3,7 @@ package com.eventportal.dao;
 import com.eventportal.model.Registration;
 import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.RegistrationStatus;
+import com.eventportal.model.MonthlyRegistrationStat;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.OffsetDateTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -190,6 +192,31 @@ public class RegistrationDAO {
              ResultSet resultSet = statement.executeQuery()) {
             resultSet.next();
             return resultSet.getInt("registration_count");
+        }
+    }
+
+    public List<MonthlyRegistrationStat> countConfirmedByMonth() throws SQLException {
+        String sql = """
+                SELECT EXTRACT(YEAR FROM registration_date)::INT AS registration_year,
+                       EXTRACT(MONTH FROM registration_date)::INT AS registration_month,
+                       COUNT(*) AS registration_count
+                FROM registrations
+                WHERE status = 'CONFIRMED'
+                GROUP BY registration_year, registration_month
+                ORDER BY registration_year, registration_month
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            List<MonthlyRegistrationStat> stats = new ArrayList<>();
+            while (resultSet.next()) {
+                stats.add(new MonthlyRegistrationStat(
+                        YearMonth.of(resultSet.getInt("registration_year"), resultSet.getInt("registration_month")),
+                        resultSet.getLong("registration_count")
+                ));
+            }
+            return stats;
         }
     }
 
