@@ -24,13 +24,25 @@ class RegistrationDetailTest {
                 RegistrationStatus.CONFIRMED,
                 OffsetDateTime.now(),
                 "",
+                EventStatus.COMPLETED,
                 LocalDate.now(),
                 "Auditorium"
         )).isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("eventTitle");
     }
 
+    @Test
+    void canGenerateCertificate_shouldRequireConfirmedRegistrationAndCompletedEvent() {
+        assertThat(registrationDetail(RegistrationStatus.CONFIRMED, EventStatus.COMPLETED).canGenerateCertificate()).isTrue();
+        assertThat(registrationDetail(RegistrationStatus.CONFIRMED, EventStatus.UPCOMING).canGenerateCertificate()).isFalse();
+        assertThat(registrationDetail(RegistrationStatus.CANCELLED, EventStatus.COMPLETED).canGenerateCertificate()).isFalse();
+    }
+
     private static RegistrationDetail registrationDetail(RegistrationStatus status) {
+        return registrationDetail(status, EventStatus.COMPLETED);
+    }
+
+    private static RegistrationDetail registrationDetail(RegistrationStatus status, EventStatus eventStatus) {
         return new RegistrationDetail(
                 1,
                 1,
@@ -38,6 +50,7 @@ class RegistrationDetailTest {
                 status,
                 OffsetDateTime.now(),
                 "Code Sprint",
+                eventStatus,
                 LocalDate.now(),
                 "Auditorium"
         );

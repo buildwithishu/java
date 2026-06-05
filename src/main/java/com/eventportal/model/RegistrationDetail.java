@@ -10,6 +10,7 @@ public record RegistrationDetail(
         RegistrationStatus status,
         OffsetDateTime registrationDate,
         String eventTitle,
+        EventStatus eventStatus,
         LocalDate eventDate,
         String venue
 ) {
@@ -26,6 +27,9 @@ public record RegistrationDetail(
         if (eventTitle == null || eventTitle.isBlank()) {
             throw new IllegalArgumentException("eventTitle is required");
         }
+        if (eventStatus == null) {
+            throw new IllegalArgumentException("eventStatus is required");
+        }
         if (eventDate == null) {
             throw new IllegalArgumentException("eventDate is required");
         }
@@ -36,5 +40,9 @@ public record RegistrationDetail(
 
     public boolean isActive() {
         return status == RegistrationStatus.CONFIRMED;
+    }
+
+    public boolean canGenerateCertificate() {
+        return isActive() && eventStatus == EventStatus.COMPLETED;
     }
 }

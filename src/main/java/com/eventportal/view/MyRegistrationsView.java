@@ -57,7 +57,7 @@ public class MyRegistrationsView {
         Label title = new Label(registration.eventTitle());
         title.getStyleClass().add("card-title");
 
-        Label details = new Label(DateTimeUtil.formatDate(registration.eventDate()) + " • " + registration.venue() + " • " + registration.uniqueRegId() + " • " + registration.status());
+        Label details = new Label(DateTimeUtil.formatDate(registration.eventDate()) + " • " + registration.venue() + " • " + registration.uniqueRegId() + " • " + registration.status() + " • " + registration.eventStatus());
         details.getStyleClass().add("muted-text");
 
         Label message = new Label();
@@ -68,7 +68,7 @@ public class MyRegistrationsView {
         cancelButton.setOnAction(event -> cancelRegistration(registration.registrationId(), list, message));
 
         Button certificateButton = new Button("Generate Certificate");
-        certificateButton.setDisable(!registration.isActive());
+        certificateButton.setDisable(!registration.canGenerateCertificate());
         certificateButton.setOnAction(event -> generateCertificate(registration.registrationId(), message));
 
         VBox text = new VBox(4, title, details, message);

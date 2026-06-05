@@ -1,9 +1,10 @@
 package com.eventportal.dao;
 
+import com.eventportal.model.EventStatus;
+import com.eventportal.model.MonthlyRegistrationStat;
 import com.eventportal.model.Registration;
 import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.RegistrationStatus;
-import com.eventportal.model.MonthlyRegistrationStat;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -103,6 +104,7 @@ public class RegistrationDAO {
                        r.unique_reg_id,
                        r.status,
                        e.title AS event_title,
+                       e.status AS event_status,
                        e.event_date,
                        e.venue
                 FROM registrations r
@@ -318,6 +320,7 @@ public class RegistrationDAO {
                 RegistrationStatus.valueOf(resultSet.getString("status")),
                 resultSet.getObject("registration_date", OffsetDateTime.class),
                 resultSet.getString("event_title"),
+                EventStatus.valueOf(resultSet.getString("event_status")),
                 resultSet.getDate("event_date").toLocalDate(),
                 resultSet.getString("venue")
         );

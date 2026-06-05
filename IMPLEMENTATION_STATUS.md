@@ -100,3 +100,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verification note: student quick stats UI depends on JavaFX/Maven; local `mvn` remains unavailable.
 - 2026-06-05: Added event organizer lookup and organizer display in event detail view.
 - 2026-06-05: Verified event organizer lookup backend path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
+- 2026-06-05: Enforced certificate generation only for confirmed registrations on completed events.
+- 2026-06-05: Verified registration detail certificate eligibility model/DAO path with dependency-free `javac`; full PDFBox/Maven verification remains blocked by missing `mvn`.

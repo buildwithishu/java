@@ -6,6 +6,7 @@ import com.eventportal.dao.RegistrationDAO;
 import com.eventportal.dao.UserDAO;
 import com.eventportal.model.Certificate;
 import com.eventportal.model.Event;
+import com.eventportal.model.EventStatus;
 import com.eventportal.model.Registration;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
@@ -59,6 +60,9 @@ public class CertificateController {
 
         Event event = eventDAO.findById(registration.eventId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + registration.eventId()));
+        if (event.status() != EventStatus.COMPLETED) {
+            throw new IllegalArgumentException("Certificate can only be generated after the event is completed");
+        }
         User certificateOwner = userDAO.findById(registration.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + registration.userId()));
         boolean alreadyGenerated = certificateDAO.findByRegistration(registration.id()).isPresent();
