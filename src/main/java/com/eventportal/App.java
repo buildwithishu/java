@@ -95,6 +95,7 @@ public class App extends Application {
             navigationManager.replace(new AdminDashboardView(
                     user,
                     dashboardController,
+                    eventController,
                     navigationManager,
                     sessionManager,
                     loginRoot

@@ -1,6 +1,7 @@
 package com.eventportal.view;
 
 import com.eventportal.controller.DashboardController;
+import com.eventportal.controller.EventController;
 import com.eventportal.model.CategoryStat;
 import com.eventportal.model.DashboardSummary;
 import com.eventportal.model.PopularEventStat;
@@ -21,6 +22,7 @@ import java.sql.SQLException;
 public class AdminDashboardView {
     private final User user;
     private final DashboardController dashboardController;
+    private final EventController eventController;
     private final NavigationManager navigationManager;
     private final SessionManager sessionManager;
     private final Parent loginRoot;
@@ -28,12 +30,14 @@ public class AdminDashboardView {
     public AdminDashboardView(
             User user,
             DashboardController dashboardController,
+            EventController eventController,
             NavigationManager navigationManager,
             SessionManager sessionManager,
             Parent loginRoot
     ) {
         this.user = user;
         this.dashboardController = dashboardController;
+        this.eventController = eventController;
         this.navigationManager = navigationManager;
         this.sessionManager = sessionManager;
         this.loginRoot = loginRoot;
@@ -55,9 +59,13 @@ public class AdminDashboardView {
         HBox header = new HBox(16, new VBox(4, title, welcome), logoutButton);
         header.setAlignment(Pos.CENTER_LEFT);
 
+        Button manageEventsButton = new Button("Manage Events");
+        manageEventsButton.getStyleClass().add("primary-action");
+        manageEventsButton.setOnAction(event -> navigationManager.show(new AdminEventManagementView(eventController, navigationManager).build()));
+
         Parent body = dashboardBody();
 
-        VBox root = new VBox(20, header, body);
+        VBox root = new VBox(20, header, manageEventsButton, body);
         root.getStyleClass().add("app-root");
         root.setPadding(new Insets(24));
         return root;
