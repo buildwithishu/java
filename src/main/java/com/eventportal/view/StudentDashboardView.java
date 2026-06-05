@@ -5,6 +5,7 @@ import com.eventportal.controller.EventController;
 import com.eventportal.controller.NotificationController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
+import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.User;
 import com.eventportal.util.NavigationManager;
 import com.eventportal.util.SessionManager;
@@ -69,10 +70,34 @@ public class StudentDashboardView {
         Label welcome = new Label("Welcome, " + user.fullName());
         welcome.getStyleClass().add("muted-text");
 
-        VBox text = new VBox(4, title, welcome);
+        VBox text = new VBox(4, title, welcome, quickStats());
         HBox header = new HBox(text);
         header.setPadding(new Insets(0, 0, 18, 0));
         return header;
+    }
+
+    private Parent quickStats() {
+        try {
+            List<RegistrationDetail> registrations = registrationController.findMyRegistrationDetails();
+            long activeRegistrations = registrations.stream()
+                    .filter(RegistrationDetail::isActive)
+                    .count();
+            int certificateCount = certificateController.findMyCertificates().size();
+            int unreadNotifications = notificationController.countUnread(user.id());
+
+            HBox stats = new HBox(
+                    12,
+                    statCard("Registered Events", activeRegistrations),
+                    statCard("Certificates", certificateCount),
+                    statCard("Unread Notifications", unreadNotifications)
+            );
+            stats.setPadding(new Insets(10, 0, 0, 0));
+            return stats;
+        } catch (SQLException exception) {
+            Label error = new Label("Quick stats unavailable until PostgreSQL is running.");
+            error.getStyleClass().add("error-text");
+            return error;
+        }
     }
 
     private Parent sidebar() {
@@ -136,5 +161,19 @@ public class StudentDashboardView {
         content.getStyleClass().add("content-panel-wide");
         content.setPadding(new Insets(20));
         root.setCenter(content);
+    }
+
+    private static Parent statCard(String label, long value) {
+        Label valueLabel = new Label(String.valueOf(value));
+        valueLabel.getStyleClass().add("stat-value");
+
+        Label nameLabel = new Label(label);
+        nameLabel.getStyleClass().add("muted-text");
+
+        VBox card = new VBox(4, valueLabel, nameLabel);
+        card.getStyleClass().add("event-card");
+        card.setPadding(new Insets(12));
+        card.setMinWidth(150);
+        return card;
     }
 }
