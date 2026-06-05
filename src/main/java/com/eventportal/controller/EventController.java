@@ -118,6 +118,16 @@ public class EventController {
         return true;
     }
 
+    public boolean deleteEvent(long eventId) throws SQLException {
+        requireAdmin();
+        Event event = eventDAO.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+        if (event.registeredCount() > 0) {
+            throw new IllegalArgumentException("Events with registrations cannot be deleted");
+        }
+        return eventDAO.deleteEvent(eventId);
+    }
+
     public Event markOngoing(long eventId) throws SQLException {
         return changeStatus(eventId, EventStatus.ONGOING);
     }

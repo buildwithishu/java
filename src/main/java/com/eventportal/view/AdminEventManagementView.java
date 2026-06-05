@@ -51,21 +51,22 @@ public class AdminEventManagementView {
         HBox header = new HBox(12, backButton, title);
         header.setAlignment(Pos.CENTER_LEFT);
 
+        VBox formContainer = new VBox();
         VBox listContainer = new VBox(12);
-        Runnable refresh = () -> refreshEvents(listContainer);
+        Runnable refresh = () -> refreshEvents(formContainer, listContainer);
 
-        Parent form = new EventFormView(eventController, refresh).build();
-        refreshEvents(listContainer);
+        formContainer.getChildren().setAll(new EventFormView(eventController, refresh).build());
+        refreshEvents(formContainer, listContainer);
 
         ScrollPane scrollPane = new ScrollPane(listContainer);
         scrollPane.setFitToWidth(true);
         scrollPane.getStyleClass().add("transparent-scroll");
 
-        root.getChildren().addAll(header, form, scrollPane);
+        root.getChildren().addAll(header, formContainer, scrollPane);
         return root;
     }
 
-    private void refreshEvents(VBox listContainer) {
+    private void refreshEvents(VBox formContainer, VBox listContainer) {
         listContainer.getChildren().clear();
         try {
             List<Event> events = eventController.findAllEvents();
@@ -76,7 +77,7 @@ public class AdminEventManagementView {
                 return;
             }
             for (Event event : events) {
-                listContainer.getChildren().add(eventRow(event, listContainer));
+                listContainer.getChildren().add(eventRow(event, formContainer, listContainer));
             }
         } catch (SQLException exception) {
             Label error = new Label("Unable to load events. Start PostgreSQL and try again.");
@@ -85,7 +86,7 @@ public class AdminEventManagementView {
         }
     }
 
-    private Parent eventRow(Event event, VBox listContainer) {
+    private Parent eventRow(Event event, VBox formContainer, VBox listContainer) {
         Label title = new Label(event.title());
         title.getStyleClass().add("card-title");
 
@@ -100,15 +101,15 @@ public class AdminEventManagementView {
 
         Button cancelButton = new Button("Cancel Event");
         cancelButton.setDisable(event.status().name().equals("CANCELLED"));
-        cancelButton.setOnAction(action -> cancelEvent(event.id(), listContainer));
+        cancelButton.setOnAction(action -> cancelEvent(event.id(), formContainer, listContainer));
 
         Button ongoingButton = new Button("Start");
         ongoingButton.setDisable(!event.status().name().equals("UPCOMING"));
-        ongoingButton.setOnAction(action -> changeStatus(event.id(), "ONGOING", listContainer));
+        ongoingButton.setOnAction(action -> changeStatus(event.id(), "ONGOING", formContainer, listContainer));
 
         Button completeButton = new Button("Complete");
         completeButton.setDisable(event.status().name().equals("COMPLETED") || event.status().name().equals("CANCELLED"));
-        completeButton.setOnAction(action -> changeStatus(event.id(), "COMPLETED", listContainer));
+        completeButton.setOnAction(action -> changeStatus(event.id(), "COMPLETED", formContainer, listContainer));
 
         Button detailsButton = new Button("Details");
         detailsButton.setOnAction(action -> navigationManager.show(new EventDetailView(
@@ -118,17 +119,41 @@ public class AdminEventManagementView {
                 navigationManager
         ).build()));
 
-        HBox row = new HBox(12, text, detailsButton, ongoingButton, completeButton, cancelButton);
+        Button editButton = new Button("Edit");
+        editButton.setDisable(event.status().name().equals("COMPLETED"));
+        editButton.setOnAction(action -> showEditForm(event, formContainer, listContainer));
+
+        Button deleteButton = new Button("Delete");
+        deleteButton.setDisable(event.registeredCount() > 0);
+        deleteButton.setOnAction(action -> deleteEvent(event.id(), formContainer, listContainer));
+
+        HBox row = new HBox(12, text, detailsButton, editButton, ongoingButton, completeButton, cancelButton, deleteButton);
         row.getStyleClass().add("event-card");
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(14));
         return row;
     }
 
-    private void cancelEvent(long eventId, VBox listContainer) {
+    private void showEditForm(Event event, VBox formContainer, VBox listContainer) {
+        Runnable refresh = () -> refreshEvents(formContainer, listContainer);
+        formContainer.getChildren().setAll(new EventFormView(eventController, refresh, event).build());
+    }
+
+    private void deleteEvent(long eventId, VBox formContainer, VBox listContainer) {
+        try {
+            eventController.deleteEvent(eventId);
+            refreshEvents(formContainer, listContainer);
+        } catch (SQLException exception) {
+            listContainer.getChildren().add(errorLabel("Unable to delete event. Database unavailable."));
+        } catch (RuntimeException exception) {
+            listContainer.getChildren().add(errorLabel(exception.getMessage()));
+        }
+    }
+
+    private void cancelEvent(long eventId, VBox formContainer, VBox listContainer) {
         try {
             eventController.cancelEvent(eventId);
-            refreshEvents(listContainer);
+            refreshEvents(formContainer, listContainer);
         } catch (SQLException exception) {
             listContainer.getChildren().add(errorLabel("Unable to cancel event. Database unavailable."));
         } catch (RuntimeException exception) {
@@ -136,14 +161,14 @@ public class AdminEventManagementView {
         }
     }
 
-    private void changeStatus(long eventId, String status, VBox listContainer) {
+    private void changeStatus(long eventId, String status, VBox formContainer, VBox listContainer) {
         try {
             if ("ONGOING".equals(status)) {
                 eventController.markOngoing(eventId);
             } else {
                 eventController.markCompleted(eventId);
             }
-            refreshEvents(listContainer);
+            refreshEvents(formContainer, listContainer);
         } catch (SQLException exception) {
             listContainer.getChildren().add(errorLabel("Unable to update event. Database unavailable."));
         } catch (RuntimeException exception) {
@@ -152,8 +177,12 @@ public class AdminEventManagementView {
     }
 
     private static Label errorLabel(String message) {
+        return label(message, "error-text");
+    }
+
+    private static Label label(String message, String styleClass) {
         Label label = new Label(message);
-        label.getStyleClass().add("error-text");
+        label.getStyleClass().add(styleClass);
         return label;
     }
 }

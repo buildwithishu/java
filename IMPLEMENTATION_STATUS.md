@@ -91,3 +91,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified certificate timestamp utility with dependency-free `javac`; JUnit execution remains Maven-bound.
 - 2026-06-05: Added notification unread count, read/unread status labels, and created-at timestamps.
 - 2026-06-05: Verified notification timestamp model/util path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
+- 2026-06-05: Added admin event edit form mode and safe delete action for events without registrations.
+- 2026-06-05: Verified admin event delete controller path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
