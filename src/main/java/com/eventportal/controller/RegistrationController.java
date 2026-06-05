@@ -2,6 +2,7 @@ package com.eventportal.controller;
 
 import com.eventportal.dao.EventDAO;
 import com.eventportal.dao.RegistrationDAO;
+import com.eventportal.dao.UserDAO;
 import com.eventportal.model.Event;
 import com.eventportal.model.Registration;
 import com.eventportal.model.RegistrationDetail;
@@ -15,17 +16,20 @@ import java.util.List;
 public class RegistrationController {
     private final RegistrationDAO registrationDAO;
     private final EventDAO eventDAO;
+    private final UserDAO userDAO;
     private final NotificationController notificationController;
     private final SessionManager sessionManager;
 
     public RegistrationController(
             RegistrationDAO registrationDAO,
             EventDAO eventDAO,
+            UserDAO userDAO,
             NotificationController notificationController,
             SessionManager sessionManager
     ) {
         this.registrationDAO = registrationDAO;
         this.eventDAO = eventDAO;
+        this.userDAO = userDAO;
         this.notificationController = notificationController;
         this.sessionManager = sessionManager;
     }
@@ -76,6 +80,11 @@ public class RegistrationController {
     public List<Registration> findRegistrationsForEvent(long eventId) throws SQLException {
         requireAdmin();
         return registrationDAO.findByEvent(eventId);
+    }
+
+    public List<User> findRegisteredUsersForEvent(long eventId) throws SQLException {
+        requireAdmin();
+        return userDAO.findRegisteredUsersByEvent(eventId);
     }
 
     public boolean isAlreadyRegistered(long eventId) throws SQLException {

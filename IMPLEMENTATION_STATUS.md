@@ -78,3 +78,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verification note: `./mvnw -v` could not complete because Maven binary download from Apache archive stalled in this environment.
 - 2026-06-05: Added model invariant tests for Event and RegistrationDetail.
 - 2026-06-05: Verified main model source compilation with `javac`; JUnit execution remains Maven-bound.
+- 2026-06-05: Added DAO/controller helper to list registered users for an event.
+- 2026-06-05: Verified registered-users backend helper with `javac`.

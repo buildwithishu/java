@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class UserDAO {
@@ -75,6 +77,28 @@ public class UserDAO {
             try (ResultSet resultSet = statement.executeQuery()) {
                 resultSet.next();
                 return resultSet.getInt("user_count");
+            }
+        }
+    }
+
+    public List<User> findRegisteredUsersByEvent(long eventId) throws SQLException {
+        String sql = """
+                SELECT u.id, u.username, u.email, u.password_hash, u.role, u.full_name, u.department, u.created_at
+                FROM users u
+                JOIN registrations r ON r.user_id = u.id
+                WHERE r.event_id = ? AND r.status = 'CONFIRMED'
+                ORDER BY u.full_name
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, eventId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<User> users = new ArrayList<>();
+                while (resultSet.next()) {
+                    users.add(mapUser(resultSet));
+                }
+                return users;
             }
         }
     }

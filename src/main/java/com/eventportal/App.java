@@ -56,6 +56,7 @@ public class App extends Application {
         RegistrationController registrationController = new RegistrationController(
                 registrationDAO,
                 eventDAO,
+                userDAO,
                 notificationController,
                 sessionManager
         );
