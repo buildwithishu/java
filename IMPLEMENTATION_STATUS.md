@@ -21,7 +21,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | JavaFX views | In progress | Login/register, student dashboard, admin dashboard, searchable event list/detail, registrations, certificates, notifications, profile, admin event management, reports, and dashboard placeholder added |
 | Utilities | In progress | Validation, date/time, session, navigation, password, and PDF certificate helpers added |
 | CI/CD | In progress | CI, release, and Docker build workflows added |
-| Documentation | In progress | README, contributing guide, and PR template added |
+| Documentation | In progress | README, contributing guide, MIT license, and PR template added |
 
 ## Implementation Log
 
@@ -95,3 +95,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified admin event delete controller path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
 - 2026-06-05: Added registrations-by-month dashboard aggregate and admin report/dashboard display.
 - 2026-06-05: Verified dashboard monthly registration backend path with dependency-free `javac`; JUnit execution remains Maven-bound.
+- 2026-06-05: Added MIT license file.
