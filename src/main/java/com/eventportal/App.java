@@ -64,7 +64,8 @@ public class App extends Application {
                 eventDAO,
                 sessionManager,
                 registrationDAO,
-                notificationController
+                notificationController,
+                userDAO
         );
         DashboardController dashboardController = new DashboardController(eventDAO, registrationDAO, userDAO);
         AuthController authController = new AuthController(

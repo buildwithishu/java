@@ -2,6 +2,7 @@ package com.eventportal.controller;
 
 import com.eventportal.dao.EventDAO;
 import com.eventportal.dao.RegistrationDAO;
+import com.eventportal.dao.UserDAO;
 import com.eventportal.model.Event;
 import com.eventportal.model.EventCategory;
 import com.eventportal.model.EventStatus;
@@ -22,21 +23,24 @@ public class EventController {
     private final SessionManager sessionManager;
     private final RegistrationDAO registrationDAO;
     private final NotificationController notificationController;
+    private final UserDAO userDAO;
 
     public EventController(EventDAO eventDAO, SessionManager sessionManager) {
-        this(eventDAO, sessionManager, null, null);
+        this(eventDAO, sessionManager, null, null, null);
     }
 
     public EventController(
             EventDAO eventDAO,
             SessionManager sessionManager,
             RegistrationDAO registrationDAO,
-            NotificationController notificationController
+            NotificationController notificationController,
+            UserDAO userDAO
     ) {
         this.eventDAO = eventDAO;
         this.sessionManager = sessionManager;
         this.registrationDAO = registrationDAO;
         this.notificationController = notificationController;
+        this.userDAO = userDAO;
     }
 
     public Event createEvent(
@@ -149,6 +153,14 @@ public class EventController {
             return eventDAO.findAll();
         }
         return eventDAO.searchByKeyword(keyword.trim());
+    }
+
+    public User findOrganizerForEvent(Event event) throws SQLException {
+        if (userDAO == null) {
+            throw new IllegalStateException("Organizer lookup is not configured");
+        }
+        return userDAO.findById(event.createdBy())
+                .orElseThrow(() -> new IllegalArgumentException("Organizer not found: " + event.createdBy()));
     }
 
     private Event changeStatus(long eventId, EventStatus nextStatus) throws SQLException {

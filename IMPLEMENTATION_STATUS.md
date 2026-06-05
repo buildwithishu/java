@@ -98,3 +98,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Added MIT license file.
 - 2026-06-05: Added student dashboard quick stats for active registrations, certificates, and unread notifications.
 - 2026-06-05: Verification note: student quick stats UI depends on JavaFX/Maven; local `mvn` remains unavailable.
+- 2026-06-05: Added event organizer lookup and organizer display in event detail view.
+- 2026-06-05: Verified event organizer lookup backend path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.

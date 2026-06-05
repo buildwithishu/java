@@ -1,5 +1,6 @@
 package com.eventportal.view;
 
+import com.eventportal.controller.EventController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
 import com.eventportal.model.EventCategory;
@@ -26,17 +27,20 @@ import java.util.List;
 
 public class EventListView {
     private final RegistrationController registrationController;
+    private final EventController eventController;
     private final NavigationManager navigationManager;
     private final User currentUser;
     private final List<Event> events;
 
     public EventListView(
             RegistrationController registrationController,
+            EventController eventController,
             NavigationManager navigationManager,
             User currentUser,
             List<Event> events
     ) {
         this.registrationController = registrationController;
+        this.eventController = eventController;
         this.navigationManager = navigationManager;
         this.currentUser = currentUser;
         this.events = List.copyOf(events);
@@ -132,6 +136,7 @@ public class EventListView {
         Button detailsButton = new Button("View Details");
         detailsButton.setOnAction(action -> navigationManager.show(new EventDetailView(
                 event,
+                eventController,
                 currentUser,
                 registrationController,
                 navigationManager

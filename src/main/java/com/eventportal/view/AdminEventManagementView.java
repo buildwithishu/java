@@ -114,6 +114,7 @@ public class AdminEventManagementView {
         Button detailsButton = new Button("Details");
         detailsButton.setOnAction(action -> navigationManager.show(new EventDetailView(
                 event,
+                eventController,
                 currentUser,
                 registrationController,
                 navigationManager

@@ -1,5 +1,6 @@
 package com.eventportal.view;
 
+import com.eventportal.controller.EventController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
 import com.eventportal.model.Role;
@@ -18,17 +19,20 @@ import java.util.List;
 
 public class EventDetailView {
     private final Event event;
+    private final EventController eventController;
     private final User currentUser;
     private final RegistrationController registrationController;
     private final NavigationManager navigationManager;
 
     public EventDetailView(
             Event event,
+            EventController eventController,
             User currentUser,
             RegistrationController registrationController,
             NavigationManager navigationManager
     ) {
         this.event = event;
+        this.eventController = eventController;
         this.currentUser = currentUser;
         this.registrationController = registrationController;
         this.navigationManager = navigationManager;
@@ -51,6 +55,7 @@ public class EventDetailView {
                 detail("Time", DateTimeUtil.formatTime(event.startTime()) + " - " + DateTimeUtil.formatTime(event.endTime())),
                 detail("Venue", event.venue()),
                 detail("Capacity", event.registeredCount() + " / " + event.capacity()),
+                organizerDetail(),
                 detail("Description", event.description())
         );
 
@@ -72,6 +77,17 @@ public class EventDetailView {
         root.getStyleClass().add("app-root");
         root.setPadding(new Insets(24));
         return root;
+    }
+
+    private Parent organizerDetail() {
+        try {
+            User organizer = eventController.findOrganizerForEvent(event);
+            return detail("Organizer", organizer.fullName() + " - " + organizer.email());
+        } catch (SQLException exception) {
+            return detail("Organizer", "Unable to load organizer.");
+        } catch (RuntimeException exception) {
+            return detail("Organizer", "Not available.");
+        }
     }
 
     private Parent studentActionSection() {
