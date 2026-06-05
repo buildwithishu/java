@@ -148,6 +148,21 @@ public class RegistrationDAO {
         }
     }
 
+    public int countConfirmed() throws SQLException {
+        String sql = """
+                SELECT COUNT(*) AS registration_count
+                FROM registrations
+                WHERE status = 'CONFIRMED'
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            resultSet.next();
+            return resultSet.getInt("registration_count");
+        }
+    }
+
     public String generateUniqueRegId(long userId, long eventId) {
         return "REG-" + eventId + "-" + userId + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }

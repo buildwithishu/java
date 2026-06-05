@@ -62,6 +62,23 @@ public class UserDAO {
         }
     }
 
+    public int countByRole(Role role) throws SQLException {
+        String sql = """
+                SELECT COUNT(*) AS user_count
+                FROM users
+                WHERE role = ?
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, role.name());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                resultSet.next();
+                return resultSet.getInt("user_count");
+            }
+        }
+    }
+
     private Optional<User> findById(Connection connection, long id) throws SQLException {
         String sql = """
                 SELECT id, username, email, password_hash, role, full_name, department, created_at
