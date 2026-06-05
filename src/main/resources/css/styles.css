@@ -1,0 +1,38 @@
+.app-root {
+    -fx-background-color: #111827;
+}
+
+.auth-panel,
+.content-panel {
+    -fx-background-color: #1f2937;
+    -fx-border-color: #374151;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-max-width: 560;
+}
+
+.screen-title {
+    -fx-font-size: 28;
+    -fx-font-weight: 700;
+    -fx-text-fill: #f9fafb;
+}
+
+.muted-text {
+    -fx-text-fill: #cbd5e1;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+.error-text {
+    -fx-text-fill: #fca5a5;
+    -fx-wrap-text: true;
+}
+
+.success-text {
+    -fx-text-fill: #86efac;
+    -fx-wrap-text: true;
+}
+
+.primary-action {
+    -fx-font-weight: 700;
+}
