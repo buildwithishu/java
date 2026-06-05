@@ -21,7 +21,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | JavaFX views | In progress | Login/register, student dashboard, admin dashboard, event list, admin event management, and dashboard placeholder added |
 | Utilities | In progress | Validation, date/time, session, navigation, password, and PDF certificate helpers added |
 | CI/CD | In progress | CI workflow added; release and Docker build workflows pending |
-| Documentation | Not started | README, contributing, PR template |
+| Documentation | In progress | README, contributing guide, and PR template added |
 
 ## Implementation Log
 
@@ -57,3 +57,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verification note: admin dashboard UI depends on JavaFX/Maven; local `mvn` and Docker daemon remain unavailable.
 - 2026-06-05: Added admin event management view and event creation form with create/cancel event actions.
 - 2026-06-05: Verification note: admin event management UI depends on JavaFX/Maven; local `mvn` remains unavailable.
+- 2026-06-05: Added README, contributing guide, and pull request template.
