@@ -50,6 +50,18 @@ public class NotificationController {
         );
     }
 
+    public boolean createEventReminder(long userId, long eventId, String message) throws SQLException {
+        if (message == null || message.isBlank()) {
+            throw new IllegalArgumentException("Reminder message is required");
+        }
+        return notificationDAO.createIfAbsent(
+                userId,
+                "Event Reminder",
+                message.trim(),
+                eventId
+        ).isPresent();
+    }
+
     public List<Notification> findByUser(long userId) throws SQLException {
         return notificationDAO.findByUser(userId);
     }

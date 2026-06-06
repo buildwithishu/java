@@ -102,3 +102,6 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-05: Verified event organizer lookup backend path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
 - 2026-06-05: Enforced certificate generation only for confirmed registrations on completed events.
 - 2026-06-05: Verified registration detail certificate eligibility model/DAO path with dependency-free `javac`; full PDFBox/Maven verification remains blocked by missing `mvn`.
+- 2026-06-06: Added duplicate-safe event reminders for active registrants with an admin send action.
+- 2026-06-06: Verified the event reminder DAO/controller path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
+- 2026-06-06: Added focused notification controller tests for reminder validation and duplicate handling.

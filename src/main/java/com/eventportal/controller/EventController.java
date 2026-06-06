@@ -9,6 +9,7 @@ import com.eventportal.model.EventStatus;
 import com.eventportal.model.Registration;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
+import com.eventportal.util.DateTimeUtil;
 import com.eventportal.util.SessionManager;
 import com.eventportal.util.ValidationUtil;
 
@@ -163,6 +164,33 @@ public class EventController {
                 .orElseThrow(() -> new IllegalArgumentException("Organizer not found: " + event.createdBy()));
     }
 
+    public int sendEventReminders(long eventId) throws SQLException {
+        requireAdmin();
+        requireNotificationSupport();
+        Event event = eventDAO.findById(eventId)
+                .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+        if (event.status() != EventStatus.UPCOMING) {
+            throw new IllegalArgumentException("Reminders can only be sent for upcoming events");
+        }
+
+        String message = event.title()
+                + " is scheduled for "
+                + DateTimeUtil.formatDate(event.eventDate())
+                + " at "
+                + DateTimeUtil.formatTime(event.startTime())
+                + " in "
+                + event.venue()
+                + ".";
+        int remindersCreated = 0;
+        for (Registration registration : registrationDAO.findByEvent(eventId)) {
+            if (registration.isActive()
+                    && notificationController.createEventReminder(registration.userId(), eventId, message)) {
+                remindersCreated++;
+            }
+        }
+        return remindersCreated;
+    }
+
     private Event changeStatus(long eventId, EventStatus nextStatus) throws SQLException {
         requireAdmin();
         Event event = eventDAO.findById(eventId)
@@ -202,6 +230,12 @@ public class EventController {
                         event.id()
                 );
             }
+        }
+    }
+
+    private void requireNotificationSupport() {
+        if (registrationDAO == null || notificationController == null) {
+            throw new IllegalStateException("Event notifications are not configured");
         }
     }
 

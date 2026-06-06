@@ -64,6 +64,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_registrations_unique_confirmed
     WHERE status = 'CONFIRMED';
 CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON notifications(user_id, is_read);
 CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notifications_event_reminder_unique
+    ON notifications(user_id, event_id, title)
+    WHERE title = 'Event Reminder';
 
 INSERT INTO users (username, email, password_hash, role, full_name, department)
 VALUES (

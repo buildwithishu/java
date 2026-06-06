@@ -10,6 +10,7 @@ import java.sql.Statement;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class NotificationDAO {
     private final DatabaseConnection databaseConnection;
@@ -36,6 +37,30 @@ public class NotificationDAO {
             }
             statement.executeUpdate();
             return readGeneratedNotification(connection, statement);
+        }
+    }
+
+    public Optional<Notification> createIfAbsent(long userId, String title, String message, long eventId) throws SQLException {
+        String sql = """
+                INSERT INTO notifications (user_id, title, message, event_id)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT (user_id, event_id, title) WHERE title = 'Event Reminder'
+                DO NOTHING
+                RETURNING id
+                """;
+
+        try (Connection connection = databaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, userId);
+            statement.setString(2, title);
+            statement.setString(3, message);
+            statement.setLong(4, eventId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    return Optional.empty();
+                }
+                return findById(connection, resultSet.getLong("id"));
+            }
         }
     }
 
@@ -120,6 +145,20 @@ public class NotificationDAO {
                     }
                     return mapNotification(resultSet);
                 }
+            }
+        }
+    }
+
+    private static Optional<Notification> findById(Connection connection, long notificationId) throws SQLException {
+        String sql = """
+                SELECT id, user_id, title, message, is_read, created_at, event_id
+                FROM notifications
+                WHERE id = ?
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, notificationId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? Optional.of(mapNotification(resultSet)) : Optional.empty();
             }
         }
     }

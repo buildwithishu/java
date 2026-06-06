@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -128,7 +129,23 @@ public class AdminEventManagementView {
         deleteButton.setDisable(event.registeredCount() > 0);
         deleteButton.setOnAction(action -> deleteEvent(event.id(), formContainer, listContainer));
 
-        HBox row = new HBox(12, text, detailsButton, editButton, ongoingButton, completeButton, cancelButton, deleteButton);
+        Button reminderButton = new Button("Send Reminder");
+        reminderButton.setDisable(!event.status().name().equals("UPCOMING") || event.registeredCount() == 0);
+        reminderButton.setOnAction(action -> sendReminders(event.id(), listContainer));
+
+        FlowPane actions = new FlowPane(8, 8);
+        actions.getChildren().addAll(
+                detailsButton,
+                editButton,
+                reminderButton,
+                ongoingButton,
+                completeButton,
+                cancelButton,
+                deleteButton
+        );
+        actions.setPrefWrapLength(520);
+
+        HBox row = new HBox(12, text, actions);
         row.getStyleClass().add("event-card");
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(14));
@@ -146,6 +163,20 @@ public class AdminEventManagementView {
             refreshEvents(formContainer, listContainer);
         } catch (SQLException exception) {
             listContainer.getChildren().add(errorLabel("Unable to delete event. Database unavailable."));
+        } catch (RuntimeException exception) {
+            listContainer.getChildren().add(errorLabel(exception.getMessage()));
+        }
+    }
+
+    private void sendReminders(long eventId, VBox listContainer) {
+        try {
+            int remindersCreated = eventController.sendEventReminders(eventId);
+            String message = remindersCreated == 0
+                    ? "Reminders were already sent to all active registrants."
+                    : "Sent " + remindersCreated + " event reminder(s).";
+            listContainer.getChildren().add(label(message, "success-text"));
+        } catch (SQLException exception) {
+            listContainer.getChildren().add(errorLabel("Unable to send reminders. Database unavailable."));
         } catch (RuntimeException exception) {
             listContainer.getChildren().add(errorLabel(exception.getMessage()));
         }
