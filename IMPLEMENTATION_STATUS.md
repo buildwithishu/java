@@ -105,3 +105,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added duplicate-safe event reminders for active registrants with an admin send action.
 - 2026-06-06: Verified the event reminder DAO/controller path with dependency-free `javac`; full JavaFX/Maven verification remains blocked by missing `mvn`.
 - 2026-06-06: Added focused notification controller tests for reminder validation and duplicate handling.
+- 2026-06-06: Added admin pie and bar charts for category distribution and monthly registrations.
+- 2026-06-06: Verification note: admin charts require JavaFX/Maven; local `mvn` and cached JavaFX jars are unavailable.

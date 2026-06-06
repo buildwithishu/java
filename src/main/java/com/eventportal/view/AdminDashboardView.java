@@ -13,8 +13,14 @@ import com.eventportal.util.SessionManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -98,7 +104,11 @@ public class AdminDashboardView {
             );
             content.getStyleClass().add("content-panel-wide");
             content.setPadding(new Insets(20));
-            return content;
+
+            ScrollPane scrollPane = new ScrollPane(content);
+            scrollPane.setFitToWidth(true);
+            scrollPane.getStyleClass().add("transparent-scroll");
+            return scrollPane;
         } catch (SQLException exception) {
             Label error = new Label("Unable to load dashboard. Start PostgreSQL and try again.");
             error.getStyleClass().add("error-text");
@@ -125,10 +135,23 @@ public class AdminDashboardView {
         Label title = new Label("Events by Category");
         title.getStyleClass().add("section-title");
         box.getChildren().add(title);
+
+        PieChart chart = new PieChart();
+        chart.setAnimated(false);
+        chart.setLabelsVisible(true);
+        chart.setLegendVisible(true);
+        chart.setPrefHeight(300);
         for (CategoryStat stat : summary.categoryDistribution()) {
-            Label row = new Label(stat.category().name() + ": " + stat.eventCount());
-            row.getStyleClass().add("muted-text");
-            box.getChildren().add(row);
+            if (stat.eventCount() > 0) {
+                chart.getData().add(new PieChart.Data(stat.category().name(), stat.eventCount()));
+            }
+        }
+        if (chart.getData().isEmpty()) {
+            Label empty = new Label("No events created yet.");
+            empty.getStyleClass().add("muted-text");
+            box.getChildren().add(empty);
+        } else {
+            box.getChildren().add(chart);
         }
         return box;
     }
@@ -163,11 +186,26 @@ public class AdminDashboardView {
             box.getChildren().add(empty);
             return box;
         }
+
+        CategoryAxis monthAxis = new CategoryAxis();
+        monthAxis.setLabel("Month");
+        NumberAxis countAxis = new NumberAxis();
+        countAxis.setLabel("Registrations");
+        countAxis.setForceZeroInRange(true);
+
+        BarChart<String, Number> chart = new BarChart<>(monthAxis, countAxis);
+        chart.setAnimated(false);
+        chart.setLegendVisible(false);
+        chart.setCategoryGap(18);
+        chart.setPrefHeight(320);
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.setName("Registrations");
         for (MonthlyRegistrationStat stat : summary.monthlyRegistrations()) {
-            Label row = new Label(stat.month() + ": " + stat.registrationCount());
-            row.getStyleClass().add("muted-text");
-            box.getChildren().add(row);
+            series.getData().add(new XYChart.Data<>(stat.month().toString(), stat.registrationCount()));
         }
+        chart.getData().add(series);
+        box.getChildren().add(chart);
         return box;
     }
 
