@@ -12,16 +12,24 @@ This file tracks implementation progress against `implementation_plan.md`.
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Maven project skeleton | In progress | Java 17+, JavaFX 21, Maven packaging scaffolded; Unix Maven bootstrapper added |
-| Docker local database | In progress | Compose, test Compose, Dockerfile, env template, and Makefile added |
-| Database schema | In progress | Core tables, constraints, indexes, admin seed, and sample seed data added |
-| Models | In progress | Immutable records and enums added |
-| DAO layer | In progress | User, event, registration, certificate, and notification DAOs added |
-| Controller/service layer | In progress | Auth, event, registration, notification, certificate, and dashboard controller foundations added |
-| JavaFX views | In progress | Login/register, student dashboard with quick stats, admin dashboard, searchable event list/detail, registrations, certificates, notifications, profile, admin event management, and reports added |
-| Utilities | In progress | Validation, date/time, session, navigation, password, and PDF certificate helpers added |
-| CI/CD | In progress | CI, release, and Docker build workflows added |
-| Documentation | In progress | README, contributing guide, MIT license, and PR template added |
+| Maven project skeleton | Verified | Java 17 target, JavaFX 21, Maven bootstrapper, tests, JaCoCo, and repeatable regular/fat JAR packaging pass locally |
+| Docker local database | Configured | Compose, test Compose, Dockerfile, env template, and Makefile added; Docker daemon validation remains outstanding |
+| Database schema | Verified | Core tables, constraints, indexes, admin/sample seed data, and live PostgreSQL integration tests pass |
+| Models | Implemented | Immutable records and enums cover the planned domain |
+| DAO layer | Verified | Core CRUD, filters, transactions, aggregates, notification deduplication, and certificate upserts pass live PostgreSQL tests |
+| Controller/service layer | Implemented | Auth, event, registration, notification, certificate, and dashboard workflows are wired and covered by focused tests |
+| JavaFX views | Implemented | Planned student/admin workflows are present and database/BCrypt/PDF work runs off the JavaFX application thread; manual UI verification remains |
+| Utilities | Implemented | Validation, date/time, session, navigation, password, async task, file, PDF generation, and PDF preview helpers added |
+| CI/CD | Configured | CI, release, and Docker build workflows added; remote GitHub execution remains outstanding |
+| Documentation | Implemented | README, contributing guide, MIT license, PR template, and implementation tracker added; product screenshots remain outstanding |
+
+## Verification Snapshot
+
+- `./mvnw clean verify -P headless`: 73 tests passed, 0 failed, 0 skipped.
+- Live PostgreSQL integration tests pass against PostgreSQL 15.
+- JaCoCo line coverage: 40.0% (908/2268); the project target remains 80%.
+- `scripts/design-check.sh`: passes.
+- Remaining environment checks: Docker image/Compose execution, manual JavaFX workflows, remote CI/release workflows.
 
 ## Implementation Log
 
@@ -134,3 +142,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Expanded controller contract tests for notification creation/queries and student/admin registration workflows.
 - 2026-06-06: Expanded event-controller tests for creation, validation, lifecycle, deletion, queries, organizer lookup, reminders, notifications, and authorization.
 - 2026-06-06: Removed AtlantaFX's redundant JavaFX 20 transitive metadata; the build now resolves the project's explicit JavaFX 21 dependencies without model warnings.
+- 2026-06-06: Reconciled implementation status with verified evidence and recorded the remaining coverage and environment-validation work.
