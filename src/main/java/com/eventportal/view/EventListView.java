@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Locale;
 
 public class EventListView {
     private final RegistrationController registrationController;
@@ -116,8 +117,15 @@ public class EventListView {
         Label details = new Label(DateTimeUtil.formatDate(event.eventDate()) + " at " + DateTimeUtil.formatTime(event.startTime()) + " • " + event.venue());
         details.getStyleClass().add("muted-text");
 
-        Label category = new Label(event.category().name() + " • " + event.status().name());
+        Label category = new Label(event.category().name());
         category.getStyleClass().add("badge");
+
+        Label status = new Label(event.status().name());
+        status.getStyleClass().addAll(
+                "status-badge",
+                "status-" + event.status().name().toLowerCase(Locale.ROOT)
+        );
+        HBox badges = new HBox(8, category, status);
 
         double progress = event.capacity() == 0 ? 0 : (double) event.registeredCount() / event.capacity();
         ProgressBar capacityBar = new ProgressBar(progress);
@@ -146,7 +154,7 @@ public class EventListView {
         footer.setAlignment(Pos.CENTER_RIGHT);
         HBox.setHgrow(capacity, Priority.ALWAYS);
 
-        VBox card = new VBox(8, title, details, category, capacityBar, footer, message);
+        VBox card = new VBox(8, title, details, badges, capacityBar, footer, message);
         card.getStyleClass().add("event-card");
         card.setPadding(new Insets(16));
         return card;

@@ -65,6 +65,34 @@
     -fx-font-weight: 700;
 }
 
+.status-badge {
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+    -fx-padding: 2 8;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+}
+
+.status-upcoming {
+    -fx-text-fill: #bfdbfe;
+    -fx-background-color: #1e3a8a;
+}
+
+.status-ongoing {
+    -fx-text-fill: #bbf7d0;
+    -fx-background-color: #14532d;
+}
+
+.status-completed {
+    -fx-text-fill: #e5e7eb;
+    -fx-background-color: #4b5563;
+}
+
+.status-cancelled {
+    -fx-text-fill: #fecaca;
+    -fx-background-color: #7f1d1d;
+}
+
 .transparent-scroll {
     -fx-background-color: transparent;
 }

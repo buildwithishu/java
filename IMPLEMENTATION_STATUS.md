@@ -110,3 +110,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added certificate Save Copy workflow with PDF file chooser and invalid-path handling.
 - 2026-06-06: Added dependency-free certificate file copy utility and tests.
 - 2026-06-06: Verified certificate file copy utility with `javac`; JUnit/JavaFX verification remains Maven-bound.
+- 2026-06-06: Added color-coded status badges to event browsing cards.
+- 2026-06-06: Verification note: event status badge UI requires JavaFX/Maven; local `mvn` remains unavailable.
