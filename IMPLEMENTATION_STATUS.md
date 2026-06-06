@@ -123,3 +123,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added CI-runnable PostgreSQL integration coverage for registration transactions, duplicate rollback, and event counts.
 - 2026-06-06: Hardened repeated packaging with signature exclusions and a separately attached `all` fat JAR.
 - 2026-06-06: Locked cancelled events against further edits and covered the terminal-state rule.
+- 2026-06-06: Added in-app first-page certificate preview rendering with PDFBox and JavaFX.

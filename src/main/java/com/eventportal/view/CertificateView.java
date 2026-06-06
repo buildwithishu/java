@@ -4,18 +4,25 @@ import com.eventportal.controller.CertificateController;
 import com.eventportal.model.Certificate;
 import com.eventportal.util.CertificateFileUtil;
 import com.eventportal.util.DateTimeUtil;
+import com.eventportal.util.PDFPreviewUtil;
+import javafx.concurrent.Task;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.awt.Desktop;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -59,18 +66,66 @@ public class CertificateView {
         Button openButton = new Button("Open PDF");
         openButton.setOnAction(event -> openCertificate(certificate, message));
 
+        Button previewButton = new Button("Preview");
+        previewButton.setOnAction(event -> previewCertificate(certificate, previewButton, message));
+
         Button saveButton = new Button("Save Copy");
         saveButton.setOnAction(event -> saveCertificateCopy(certificate, saveButton, message));
 
         VBox text = new VBox(4, title, generatedAt, path, message);
         HBox.setHgrow(text, Priority.ALWAYS);
 
-        HBox actions = new HBox(8, openButton, saveButton);
+        HBox actions = new HBox(8, previewButton, openButton, saveButton);
         HBox row = new HBox(12, text, actions);
         row.getStyleClass().add("event-card");
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(14));
         return row;
+    }
+
+    private static void previewCertificate(Certificate certificate, Button previewButton, Label message) {
+        Path certificatePath = resolveCertificatePath(certificate, message);
+        if (certificatePath == null) {
+            return;
+        }
+
+        previewButton.setDisable(true);
+        Task<BufferedImage> renderTask = new Task<>() {
+            @Override
+            protected BufferedImage call() throws IOException {
+                return PDFPreviewUtil.renderFirstPage(certificatePath);
+            }
+        };
+        renderTask.setOnSucceeded(event -> {
+            previewButton.setDisable(false);
+            showPreviewDialog(renderTask.getValue());
+            showSuccess(message, "Certificate preview opened.");
+        });
+        renderTask.setOnFailed(event -> {
+            previewButton.setDisable(false);
+            showError(message, "Unable to preview certificate PDF.");
+        });
+
+        Thread renderThread = new Thread(renderTask, "certificate-preview-renderer");
+        renderThread.setDaemon(true);
+        renderThread.start();
+    }
+
+    private static void showPreviewDialog(BufferedImage renderedPage) {
+        ImageView preview = new ImageView(SwingFXUtils.toFXImage(renderedPage, null));
+        preview.setPreserveRatio(true);
+        preview.setFitWidth(720);
+
+        ScrollPane previewPane = new ScrollPane(preview);
+        previewPane.setFitToWidth(true);
+        previewPane.setPrefViewportWidth(740);
+        previewPane.setPrefViewportHeight(620);
+
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Certificate Preview");
+        dialog.getDialogPane().setContent(previewPane);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        dialog.showAndWait();
     }
 
     private static void openCertificate(Certificate certificate, Label message) {
