@@ -4,6 +4,7 @@ import com.eventportal.controller.CertificateController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.RegistrationDetail;
 import com.eventportal.util.DateTimeUtil;
+import com.eventportal.util.FxTaskRunner;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -14,8 +15,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 public class MyRegistrationsView {
@@ -39,17 +38,26 @@ public class MyRegistrationsView {
 
     private void refresh(VBox list) {
         list.getChildren().clear();
-        try {
-            List<RegistrationDetail> registrations = registrationController.findMyRegistrationDetails();
-            if (registrations.isEmpty()) {
-                list.getChildren().add(emptyLabel("You have not registered for any events yet."));
-                return;
-            }
-            for (RegistrationDetail registration : registrations) {
-                list.getChildren().add(registrationCard(registration, list));
-            }
-        } catch (SQLException exception) {
-            list.getChildren().add(errorLabel("Unable to load registrations. Start PostgreSQL and try again."));
+        list.getChildren().add(emptyLabel("Loading registrations..."));
+        FxTaskRunner.run(
+                "registration-list-loader",
+                registrationController::findMyRegistrationDetails,
+                registrations -> renderRegistrations(list, registrations),
+                failure -> {
+                    list.getChildren().clear();
+                    list.getChildren().add(errorLabel("Unable to load registrations. Start PostgreSQL and try again."));
+                }
+        );
+    }
+
+    private void renderRegistrations(VBox list, List<RegistrationDetail> registrations) {
+        list.getChildren().clear();
+        if (registrations.isEmpty()) {
+            list.getChildren().add(emptyLabel("You have not registered for any events yet."));
+            return;
+        }
+        for (RegistrationDetail registration : registrations) {
+            list.getChildren().add(registrationCard(registration, list));
         }
     }
 
@@ -65,11 +73,20 @@ public class MyRegistrationsView {
 
         Button cancelButton = new Button("Cancel");
         cancelButton.setDisable(!registration.isActive());
-        cancelButton.setOnAction(event -> cancelRegistration(registration.registrationId(), list, message));
+        cancelButton.setOnAction(event -> cancelRegistration(
+                registration.registrationId(),
+                cancelButton,
+                list,
+                message
+        ));
 
         Button certificateButton = new Button("Generate Certificate");
         certificateButton.setDisable(!registration.canGenerateCertificate());
-        certificateButton.setOnAction(event -> generateCertificate(registration.registrationId(), message));
+        certificateButton.setOnAction(event -> generateCertificate(
+                registration.registrationId(),
+                certificateButton,
+                message
+        ));
 
         VBox text = new VBox(4, title, details, message);
         HBox.setHgrow(text, Priority.ALWAYS);
@@ -81,29 +98,46 @@ public class MyRegistrationsView {
         return row;
     }
 
-    private void cancelRegistration(long registrationId, VBox list, Label message) {
-        try {
-            if (registrationController.cancelRegistration(registrationId)) {
-                refresh(list);
-            }
-        } catch (SQLException exception) {
-            showError(message, "Unable to cancel registration. Database unavailable.");
-        } catch (RuntimeException exception) {
-            showError(message, exception.getMessage());
-        }
+    private void cancelRegistration(long registrationId, Button cancelButton, VBox list, Label message) {
+        cancelButton.setDisable(true);
+        FxTaskRunner.run(
+                "registration-canceller",
+                () -> registrationController.cancelRegistration(registrationId),
+                cancelled -> {
+                    if (cancelled) {
+                        refresh(list);
+                    } else {
+                        cancelButton.setDisable(false);
+                        showError(message, "Registration was already cancelled.");
+                    }
+                },
+                failure -> {
+                    cancelButton.setDisable(false);
+                    showError(message, operationMessage(failure, "Unable to cancel registration. Database unavailable."));
+                }
+        );
     }
 
-    private void generateCertificate(long registrationId, Label message) {
-        try {
-            certificateController.generateForRegistration(registrationId);
-            showSuccess(message, "Certificate generated.");
-        } catch (SQLException exception) {
-            showError(message, "Unable to save certificate. Database unavailable.");
-        } catch (IOException exception) {
-            showError(message, "Unable to write certificate PDF.");
-        } catch (RuntimeException exception) {
-            showError(message, exception.getMessage());
-        }
+    private void generateCertificate(long registrationId, Button certificateButton, Label message) {
+        certificateButton.setDisable(true);
+        FxTaskRunner.run(
+                "certificate-generator",
+                () -> certificateController.generateForRegistration(registrationId),
+                certificate -> {
+                    certificateButton.setDisable(false);
+                    showSuccess(message, "Certificate generated.");
+                },
+                failure -> {
+                    certificateButton.setDisable(false);
+                    showError(message, operationMessage(failure, "Unable to generate certificate."));
+                }
+        );
+    }
+
+    private static String operationMessage(Throwable failure, String fallback) {
+        return failure instanceof IllegalArgumentException || failure instanceof IllegalStateException
+                ? failure.getMessage()
+                : fallback;
     }
 
     private static Label emptyLabel(String text) {

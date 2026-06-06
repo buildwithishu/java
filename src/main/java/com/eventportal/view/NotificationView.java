@@ -4,6 +4,7 @@ import com.eventportal.controller.NotificationController;
 import com.eventportal.model.Notification;
 import com.eventportal.model.User;
 import com.eventportal.util.DateTimeUtil;
+import com.eventportal.util.FxTaskRunner;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -14,7 +15,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class NotificationView {
@@ -32,7 +32,7 @@ public class NotificationView {
         refresh(list, unreadSummary);
 
         Button markAllButton = new Button("Mark all as read");
-        markAllButton.setOnAction(event -> markAllAsRead(list, unreadSummary));
+        markAllButton.setOnAction(event -> markAllAsRead(markAllButton, list, unreadSummary));
 
         HBox toolbar = new HBox(12, unreadSummary, markAllButton);
         toolbar.setAlignment(Pos.CENTER_LEFT);
@@ -46,18 +46,30 @@ public class NotificationView {
 
     private void refresh(VBox list, Label unreadSummary) {
         list.getChildren().clear();
-        try {
-            List<Notification> notifications = notificationController.findByUser(user.id());
-            updateUnreadSummary(unreadSummary, notifications);
-            if (notifications.isEmpty()) {
-                list.getChildren().add(label("No notifications yet.", "muted-text"));
-                return;
-            }
-            for (Notification notification : notifications) {
-                list.getChildren().add(notificationRow(notification, list, unreadSummary));
-            }
-        } catch (SQLException exception) {
-            list.getChildren().add(label("Unable to load notifications. Start PostgreSQL and try again.", "error-text"));
+        list.getChildren().add(label("Loading notifications...", "muted-text"));
+        FxTaskRunner.run(
+                "notification-list-loader",
+                () -> notificationController.findByUser(user.id()),
+                notifications -> renderNotifications(list, unreadSummary, notifications),
+                failure -> {
+                    list.getChildren().clear();
+                    list.getChildren().add(label(
+                            "Unable to load notifications. Start PostgreSQL and try again.",
+                            "error-text"
+                    ));
+                }
+        );
+    }
+
+    private void renderNotifications(VBox list, Label unreadSummary, List<Notification> notifications) {
+        list.getChildren().clear();
+        updateUnreadSummary(unreadSummary, notifications);
+        if (notifications.isEmpty()) {
+            list.getChildren().add(label("No notifications yet.", "muted-text"));
+            return;
+        }
+        for (Notification notification : notifications) {
+            list.getChildren().add(notificationRow(notification, list, unreadSummary));
         }
     }
 
@@ -72,7 +84,7 @@ public class NotificationView {
 
         Button readButton = new Button("Mark read");
         readButton.setDisable(notification.read());
-        readButton.setOnAction(event -> markAsRead(notification.id(), list, unreadSummary));
+        readButton.setOnAction(event -> markAsRead(notification.id(), readButton, list, unreadSummary));
 
         HBox row = new HBox(12, text, status, readButton);
         row.getStyleClass().add("event-card");
@@ -81,22 +93,33 @@ public class NotificationView {
         return row;
     }
 
-    private void markAsRead(long notificationId, VBox list, Label unreadSummary) {
-        try {
-            notificationController.markAsRead(notificationId);
-            refresh(list, unreadSummary);
-        } catch (SQLException exception) {
-            list.getChildren().add(label("Unable to update notification.", "error-text"));
-        }
+    private void markAsRead(long notificationId, Button readButton, VBox list, Label unreadSummary) {
+        readButton.setDisable(true);
+        FxTaskRunner.run(
+                "notification-reader",
+                () -> notificationController.markAsRead(notificationId),
+                updated -> refresh(list, unreadSummary),
+                failure -> {
+                    readButton.setDisable(false);
+                    list.getChildren().add(label("Unable to update notification.", "error-text"));
+                }
+        );
     }
 
-    private void markAllAsRead(VBox list, Label unreadSummary) {
-        try {
-            notificationController.markAllAsRead(user.id());
-            refresh(list, unreadSummary);
-        } catch (SQLException exception) {
-            list.getChildren().add(label("Unable to update notifications.", "error-text"));
-        }
+    private void markAllAsRead(Button markAllButton, VBox list, Label unreadSummary) {
+        markAllButton.setDisable(true);
+        FxTaskRunner.run(
+                "notification-bulk-reader",
+                () -> notificationController.markAllAsRead(user.id()),
+                updated -> {
+                    markAllButton.setDisable(false);
+                    refresh(list, unreadSummary);
+                },
+                failure -> {
+                    markAllButton.setDisable(false);
+                    list.getChildren().add(label("Unable to update notifications.", "error-text"));
+                }
+        );
     }
 
     private static void updateUnreadSummary(Label unreadSummary, List<Notification> notifications) {

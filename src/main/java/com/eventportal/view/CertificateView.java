@@ -4,8 +4,8 @@ import com.eventportal.controller.CertificateController;
 import com.eventportal.model.Certificate;
 import com.eventportal.util.CertificateFileUtil;
 import com.eventportal.util.DateTimeUtil;
+import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.PDFPreviewUtil;
-import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,7 +26,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.util.List;
 
 public class CertificateView {
@@ -38,23 +37,35 @@ public class CertificateView {
 
     public Parent build() {
         VBox list = new VBox(12);
-        try {
-            List<Certificate> certificates = certificateController.findMyCertificates();
-            if (certificates.isEmpty()) {
-                list.getChildren().add(label("No certificates generated yet.", "muted-text"));
-            } else {
-                for (Certificate certificate : certificates) {
-                    list.getChildren().add(certificateRow(certificate));
+        list.getChildren().add(label("Loading certificates...", "muted-text"));
+        FxTaskRunner.run(
+                "certificate-list-loader",
+                certificateController::findMyCertificates,
+                certificates -> renderCertificates(list, certificates),
+                failure -> {
+                    list.getChildren().clear();
+                    list.getChildren().add(label(
+                            "Unable to load certificates. Start PostgreSQL and try again.",
+                            "error-text"
+                    ));
                 }
-            }
-        } catch (SQLException exception) {
-            list.getChildren().add(label("Unable to load certificates. Start PostgreSQL and try again.", "error-text"));
-        }
+        );
 
         ScrollPane scrollPane = new ScrollPane(list);
         scrollPane.setFitToWidth(true);
         scrollPane.getStyleClass().add("transparent-scroll");
         return scrollPane;
+    }
+
+    private static void renderCertificates(VBox list, List<Certificate> certificates) {
+        list.getChildren().clear();
+        if (certificates.isEmpty()) {
+            list.getChildren().add(label("No certificates generated yet.", "muted-text"));
+            return;
+        }
+        for (Certificate certificate : certificates) {
+            list.getChildren().add(certificateRow(certificate));
+        }
     }
 
     private static Parent certificateRow(Certificate certificate) {
@@ -90,25 +101,19 @@ public class CertificateView {
         }
 
         previewButton.setDisable(true);
-        Task<BufferedImage> renderTask = new Task<>() {
-            @Override
-            protected BufferedImage call() throws IOException {
-                return PDFPreviewUtil.renderFirstPage(certificatePath);
-            }
-        };
-        renderTask.setOnSucceeded(event -> {
-            previewButton.setDisable(false);
-            showPreviewDialog(renderTask.getValue());
-            showSuccess(message, "Certificate preview opened.");
-        });
-        renderTask.setOnFailed(event -> {
-            previewButton.setDisable(false);
-            showError(message, "Unable to preview certificate PDF.");
-        });
-
-        Thread renderThread = new Thread(renderTask, "certificate-preview-renderer");
-        renderThread.setDaemon(true);
-        renderThread.start();
+        FxTaskRunner.run(
+                "certificate-preview-renderer",
+                () -> PDFPreviewUtil.renderFirstPage(certificatePath),
+                renderedPage -> {
+                    previewButton.setDisable(false);
+                    showPreviewDialog(renderedPage);
+                    showSuccess(message, "Certificate preview opened.");
+                },
+                failure -> {
+                    previewButton.setDisable(false);
+                    showError(message, "Unable to preview certificate PDF.");
+                }
+        );
     }
 
     private static void showPreviewDialog(BufferedImage renderedPage) {

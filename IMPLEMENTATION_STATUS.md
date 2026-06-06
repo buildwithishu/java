@@ -125,3 +125,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Locked cancelled events against further edits and covered the terminal-state rule.
 - 2026-06-06: Added in-app first-page certificate preview rendering with PDFBox and JavaFX.
 - 2026-06-06: Expanded live PostgreSQL integration coverage across all core DAOs, CRUD, filters, aggregates, notifications, and certificate upserts.
+- 2026-06-06: Moved student registration, certificate, preview, and notification database work off the JavaFX application thread.
