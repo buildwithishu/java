@@ -9,6 +9,7 @@ import com.eventportal.util.ValidationUtil;
 
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
+import java.util.Locale;
 import java.util.Optional;
 
 public class AuthController {
@@ -35,23 +36,27 @@ public class AuthController {
     }
 
     public User registerStudent(String username, String email, String password, String fullName, String department) throws SQLException {
-        validateRegistration(username, email, password, fullName);
+        String normalizedUsername = normalizeRequiredText(username);
+        String normalizedEmail = normalizeRequiredText(email).toLowerCase(Locale.ROOT);
+        String normalizedFullName = normalizeRequiredText(fullName);
+        String normalizedDepartment = normalizeOptionalText(department);
+        validateRegistration(normalizedUsername, normalizedEmail, password, normalizedFullName);
 
-        if (userDAO.findByUsername(username.trim()).isPresent()) {
+        if (userDAO.findByUsername(normalizedUsername).isPresent()) {
             throw new IllegalArgumentException("Username is already registered");
         }
-        if (userDAO.findByEmail(email.trim()).isPresent()) {
+        if (userDAO.findByEmail(normalizedEmail).isPresent()) {
             throw new IllegalArgumentException("Email is already registered");
         }
 
         User newUser = new User(
                 0,
-                username.trim(),
-                email.trim().toLowerCase(),
+                normalizedUsername,
+                normalizedEmail,
                 PasswordHasher.hash(password),
                 Role.STUDENT,
-                fullName.trim(),
-                normalizeOptionalText(department),
+                normalizedFullName,
+                normalizedDepartment,
                 OffsetDateTime.now()
         );
 
@@ -79,5 +84,9 @@ public class AuthController {
 
     private static String normalizeOptionalText(String value) {
         return ValidationUtil.isBlank(value) ? null : value.trim();
+    }
+
+    private static String normalizeRequiredText(String value) {
+        return value == null ? "" : value.trim();
     }
 }
