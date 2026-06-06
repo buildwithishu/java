@@ -132,3 +132,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Moved login and student account creation, including BCrypt work, off the JavaFX application thread.
 - 2026-06-06: Removed the obsolete dashboard placeholder and made role-based dashboard routing exhaustive.
 - 2026-06-06: Expanded controller contract tests for notification creation/queries and student/admin registration workflows.
+- 2026-06-06: Expanded event-controller tests for creation, validation, lifecycle, deletion, queries, organizer lookup, reminders, notifications, and authorization.
