@@ -16,12 +16,13 @@ class CertificateFileUtilTest {
 
     @Test
     void copyTo_shouldCopyCertificateAndReplaceExistingFile() throws IOException {
-        Path source = tempDirectory.resolve("source.pdf");
+        Path certificateDirectory = Files.createDirectory(tempDirectory.resolve("certificates"));
+        Path source = certificateDirectory.resolve("source.pdf");
         Path destination = tempDirectory.resolve("download.pdf");
         Files.writeString(source, "certificate");
         Files.writeString(destination, "old");
 
-        Path copiedPath = CertificateFileUtil.copyTo(source.toString(), destination);
+        Path copiedPath = CertificateFileUtil.copyTo(source.toString(), certificateDirectory, destination);
 
         assertThat(copiedPath).isEqualTo(destination.toAbsolutePath().normalize());
         assertThat(Files.readString(destination)).isEqualTo("certificate");
@@ -29,10 +30,39 @@ class CertificateFileUtilTest {
 
     @Test
     void resolveExisting_shouldRejectMissingFile() {
+        Path certificateDirectory = tempDirectory.resolve("certificates");
         Path missing = tempDirectory.resolve("missing.pdf");
 
-        assertThatThrownBy(() -> CertificateFileUtil.resolveExisting(missing.toString()))
+        assertThatThrownBy(() -> CertificateFileUtil.resolveExisting(missing.toString(), certificateDirectory))
                 .isInstanceOf(IOException.class)
-                .hasMessageContaining("does not exist");
+                .hasMessageContaining("certificates");
+    }
+
+    @Test
+    void resolveExisting_shouldRejectFilesOutsideConfiguredDirectory() throws IOException {
+        Path certificateDirectory = Files.createDirectory(tempDirectory.resolve("certificates"));
+        Path outside = tempDirectory.resolve("outside.pdf");
+        Files.writeString(outside, "not allowed");
+
+        assertThatThrownBy(() -> CertificateFileUtil.resolveExisting(
+                outside.toString(),
+                certificateDirectory
+        )).isInstanceOf(IOException.class)
+                .hasMessageContaining("outside");
+    }
+
+    @Test
+    void resolveExisting_shouldRejectSymlinkEscapes() throws IOException {
+        Path certificateDirectory = Files.createDirectory(tempDirectory.resolve("certificates"));
+        Path outside = tempDirectory.resolve("outside.pdf");
+        Path link = certificateDirectory.resolve("linked.pdf");
+        Files.writeString(outside, "not allowed");
+        Files.createSymbolicLink(link, outside);
+
+        assertThatThrownBy(() -> CertificateFileUtil.resolveExisting(
+                link.toString(),
+                certificateDirectory
+        )).isInstanceOf(IOException.class)
+                .hasMessageContaining("outside");
     }
 }

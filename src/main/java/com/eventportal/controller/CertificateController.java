@@ -11,6 +11,7 @@ import com.eventportal.model.Registration;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
 import com.eventportal.util.AppConfig;
+import com.eventportal.util.CertificateFileUtil;
 import com.eventportal.util.PDFGenerator;
 import com.eventportal.util.SessionManager;
 
@@ -83,6 +84,21 @@ public class CertificateController {
     public List<Certificate> findMyCertificates() throws SQLException {
         User user = requireLoggedInUser();
         return certificateDAO.findByUser(user.id());
+    }
+
+    public Path resolveCertificatePath(Certificate certificate) throws IOException {
+        return CertificateFileUtil.resolveExisting(
+                certificate.certificatePath(),
+                Path.of(appConfig.certificatesDirectory())
+        );
+    }
+
+    public Path copyCertificate(Certificate certificate, Path destination) throws IOException {
+        return CertificateFileUtil.copyTo(
+                certificate.certificatePath(),
+                Path.of(appConfig.certificatesDirectory()),
+                destination
+        );
     }
 
     private User requireLoggedInUser() {

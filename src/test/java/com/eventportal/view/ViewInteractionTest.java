@@ -167,6 +167,8 @@ class ViewInteractionTest extends JavaFxTestSupport {
         when(registrationController.findMyRegistrationDetails()).thenReturn(List.of(detail));
         when(certificateController.generateForRegistration(21)).thenReturn(certificate);
         when(certificateController.findMyCertificates()).thenReturn(List.of(certificate));
+        when(certificateController.resolveCertificatePath(certificate))
+                .thenThrow(new java.io.IOException("Certificate file does not exist"));
 
         Parent registrations = onFxThread(() ->
                 new MyRegistrationsView(registrationController, certificateController).build());

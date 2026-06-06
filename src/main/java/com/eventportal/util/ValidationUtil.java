@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 
 public final class ValidationUtil {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[A-Z0-9._-]{3,50}$", Pattern.CASE_INSENSITIVE);
+    private static final int MAX_PASSWORD_LENGTH = 72;
 
     private ValidationUtil() {
     }
@@ -15,11 +17,15 @@ public final class ValidationUtil {
     }
 
     public static boolean isValidEmail(String email) {
-        return !isBlank(email) && EMAIL_PATTERN.matcher(email).matches();
+        return !isBlank(email) && email.length() <= 120 && EMAIL_PATTERN.matcher(email).matches();
+    }
+
+    public static boolean isValidUsername(String username) {
+        return !isBlank(username) && USERNAME_PATTERN.matcher(username).matches();
     }
 
     public static boolean isStrongPassword(String password) {
-        if (password == null || password.length() < 8) {
+        if (password == null || password.length() < 8 || password.length() > MAX_PASSWORD_LENGTH) {
             return false;
         }
 
@@ -37,6 +43,10 @@ public final class ValidationUtil {
 
     public static boolean isPositiveCapacity(int capacity) {
         return capacity > 0;
+    }
+
+    public static boolean hasMaxLength(String value, int maximumLength) {
+        return value != null && value.length() <= maximumLength;
     }
 
     public static boolean isFutureOrToday(LocalDate date) {

@@ -151,6 +151,33 @@ class EventControllerTest {
     }
 
     @Test
+    void createEvent_shouldRejectOversizedDatabaseFields() {
+        assertThatThrownBy(() -> eventController.createEvent(
+                "T".repeat(161),
+                "Description",
+                EventCategory.WORKSHOP,
+                "Seminar Hall",
+                LocalDate.now().plusDays(5),
+                LocalTime.of(10, 0),
+                LocalTime.of(12, 0),
+                50
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("160");
+        assertThatThrownBy(() -> eventController.createEvent(
+                "Workshop",
+                "D".repeat(5001),
+                EventCategory.WORKSHOP,
+                "Seminar Hall",
+                LocalDate.now().plusDays(5),
+                LocalTime.of(10, 0),
+                LocalTime.of(12, 0),
+                50
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("5000");
+        verifyNoInteractions(eventDAO);
+    }
+
+    @Test
     void createEvent_shouldRequireAdminRole() {
         sessionManager.login(student());
 

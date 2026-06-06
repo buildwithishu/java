@@ -10,6 +10,13 @@ RUN mvn clean package -DskipTests -P headless
 FROM eclipse-temurin:21-jre AS runtime
 
 WORKDIR /app
+RUN groupadd --system eventportal \
+    && useradd --system --gid eventportal --home-dir /app --shell /usr/sbin/nologin eventportal \
+    && mkdir -p /app/certificates \
+    && chown -R eventportal:eventportal /app
 COPY --from=builder /app/target/college-event-portal-all.jar app.jar
+RUN chown eventportal:eventportal app.jar
+
+USER eventportal
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

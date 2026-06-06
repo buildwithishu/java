@@ -89,6 +89,24 @@ class NotificationControllerTest {
     }
 
     @Test
+    void createNotification_shouldRejectOversizedContent() {
+        assertThatThrownBy(() -> notificationController.createNotification(
+                7,
+                "T".repeat(161),
+                "Message",
+                null
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("160");
+        assertThatThrownBy(() -> notificationController.createEventReminder(
+                7,
+                3,
+                "M".repeat(5001)
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("5000");
+        verifyNoInteractions(notificationDAO);
+    }
+
+    @Test
     void convenienceNotifications_shouldCreateExpectedMessages() throws SQLException {
         notificationController.createRegistrationConfirmation(7, 3, "Code Sprint");
         notificationController.createCancellationNotice(7, 3, "Code Sprint");

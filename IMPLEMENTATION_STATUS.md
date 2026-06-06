@@ -25,7 +25,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 
 ## Verification Snapshot
 
-- `./mvnw clean verify -P headless`: 87 tests passed, 0 failed, 0 skipped.
+- `./mvnw clean verify -P headless`: 95 tests passed, 0 failed, 0 skipped.
 - Live PostgreSQL integration tests pass against PostgreSQL 15.
 - JaCoCo line coverage: 80.3% (1822/2268); Maven enforces a minimum 80% bundle line-coverage gate.
 - `scripts/design-check.sh`: passes.
@@ -150,3 +150,6 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added JavaFX application-bootstrap coverage for theme setup, dependency wiring, stage configuration, and the initial login screen.
 - 2026-06-06: Reached 80.3% line coverage and added an enforced 80% JaCoCo bundle gate to Maven verify.
 - 2026-06-06: Made JavaFX verification display-aware in Make and explicitly installed Xvfb in CI; both Compose configurations validate locally.
+- 2026-06-06: Hardened boundary lengths, BCrypt input size, certificate path confinement, non-root container execution, and GHCR release image naming.
+- 2026-06-06: Replaced per-operation DriverManager connections with a bounded, lazy HikariCP pool while preserving DAO try-with-resources behavior.
+- 2026-06-06: Excluded module descriptors from the shaded classpath JAR to avoid duplicate multi-release module metadata.

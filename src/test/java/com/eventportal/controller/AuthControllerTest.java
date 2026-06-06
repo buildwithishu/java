@@ -118,7 +118,47 @@ class AuthControllerTest {
                 "Student",
                 null
         )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("A valid email is required");
+                .hasMessage("A valid email of at most 120 characters is required");
+        verifyNoInteractions(userDAO);
+    }
+
+    @Test
+    void registerStudent_shouldRejectValuesThatExceedDatabaseLimits() {
+        assertThatThrownBy(() -> authController.registerStudent(
+                "s".repeat(51),
+                "new@college.edu",
+                "secure123",
+                "New Student",
+                null
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("3-50");
+        assertThatThrownBy(() -> authController.registerStudent(
+                "newstudent",
+                "new@college.edu",
+                "secure123",
+                "N".repeat(121),
+                null
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Full name");
+        assertThatThrownBy(() -> authController.registerStudent(
+                "newstudent",
+                "new@college.edu",
+                "secure123",
+                "New Student",
+                "D".repeat(121)
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Department");
+        verifyNoInteractions(userDAO);
+    }
+
+    @Test
+    void login_shouldRejectOversizedCredentialsBeforeDatabaseAccess() {
+        assertThatThrownBy(() -> authController.login("s".repeat(51), "secure123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid username or password");
+        assertThatThrownBy(() -> authController.login("student", "a1" + "x".repeat(71)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid username or password");
         verifyNoInteractions(userDAO);
     }
 

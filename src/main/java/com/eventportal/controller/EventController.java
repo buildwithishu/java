@@ -271,14 +271,23 @@ public class EventController {
         if (ValidationUtil.isBlank(title)) {
             throw new IllegalArgumentException("Event title is required");
         }
+        if (!ValidationUtil.hasMaxLength(title.trim(), 160)) {
+            throw new IllegalArgumentException("Event title must be at most 160 characters");
+        }
         if (ValidationUtil.isBlank(description)) {
             throw new IllegalArgumentException("Event description is required");
+        }
+        if (!ValidationUtil.hasMaxLength(description.trim(), 5000)) {
+            throw new IllegalArgumentException("Event description must be at most 5000 characters");
         }
         if (category == null) {
             throw new IllegalArgumentException("Event category is required");
         }
         if (ValidationUtil.isBlank(venue)) {
             throw new IllegalArgumentException("Venue is required");
+        }
+        if (!ValidationUtil.hasMaxLength(venue.trim(), 160)) {
+            throw new IllegalArgumentException("Venue must be at most 160 characters");
         }
         if (!ValidationUtil.isFutureOrToday(eventDate)) {
             throw new IllegalArgumentException("Event date must be today or later");

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,7 +69,7 @@ class ViewBuildTest extends JavaFxTestSupport {
         User student = user(7, Role.STUDENT);
         Event upcoming = event(EventStatus.UPCOMING);
         when(eventController.findUpcomingEvents()).thenReturn(List.of(upcoming));
-        when(eventController.findOrganizerForEvent(upcoming)).thenReturn(user(1, Role.ADMIN));
+        lenient().when(eventController.findOrganizerForEvent(upcoming)).thenReturn(user(1, Role.ADMIN));
         when(registrationController.findMyRegistrationDetails()).thenReturn(List.of());
         when(certificateController.findMyCertificates()).thenReturn(List.of());
 
@@ -109,7 +110,7 @@ class ViewBuildTest extends JavaFxTestSupport {
         DashboardSummary summary = new DashboardSummary(0, 0, 0, List.of(), List.of(), List.of());
         when(dashboardController.loadAdminSummary()).thenReturn(summary);
         when(eventController.findAllEvents()).thenReturn(List.of(upcoming));
-        when(eventController.findOrganizerForEvent(upcoming)).thenReturn(admin);
+        lenient().when(eventController.findOrganizerForEvent(upcoming)).thenReturn(admin);
 
         assertBuilds(() -> new AdminDashboardView(
                 admin,

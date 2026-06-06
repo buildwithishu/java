@@ -2,7 +2,6 @@ package com.eventportal.view;
 
 import com.eventportal.controller.CertificateController;
 import com.eventportal.model.Certificate;
-import com.eventportal.util.CertificateFileUtil;
 import com.eventportal.util.DateTimeUtil;
 import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.PDFPreviewUtil;
@@ -57,7 +56,7 @@ public class CertificateView {
         return scrollPane;
     }
 
-    private static void renderCertificates(VBox list, List<Certificate> certificates) {
+    private void renderCertificates(VBox list, List<Certificate> certificates) {
         list.getChildren().clear();
         if (certificates.isEmpty()) {
             list.getChildren().add(label("No certificates generated yet.", "muted-text"));
@@ -68,7 +67,7 @@ public class CertificateView {
         }
     }
 
-    private static Parent certificateRow(Certificate certificate) {
+    private Parent certificateRow(Certificate certificate) {
         Label title = label("Certificate #" + certificate.id(), "card-title");
         Label path = label(certificate.certificatePath(), "muted-text");
         Label generatedAt = label("Generated " + DateTimeUtil.formatDateTime(certificate.generatedAt()), "muted-text");
@@ -94,7 +93,7 @@ public class CertificateView {
         return row;
     }
 
-    private static void previewCertificate(Certificate certificate, Button previewButton, Label message) {
+    private void previewCertificate(Certificate certificate, Button previewButton, Label message) {
         Path certificatePath = resolveCertificatePath(certificate, message);
         if (certificatePath == null) {
             return;
@@ -133,7 +132,7 @@ public class CertificateView {
         dialog.showAndWait();
     }
 
-    private static void openCertificate(Certificate certificate, Label message) {
+    private void openCertificate(Certificate certificate, Label message) {
         Path certificatePath = resolveCertificatePath(certificate, message);
         if (certificatePath == null) {
             return;
@@ -151,7 +150,7 @@ public class CertificateView {
         }
     }
 
-    private static void saveCertificateCopy(Certificate certificate, Button saveButton, Label message) {
+    private void saveCertificateCopy(Certificate certificate, Button saveButton, Label message) {
         Path sourcePath = resolveCertificatePath(certificate, message);
         if (sourcePath == null) {
             return;
@@ -174,16 +173,16 @@ public class CertificateView {
         }
 
         try {
-            Path copiedPath = CertificateFileUtil.copyTo(certificate.certificatePath(), destinationPath);
+            Path copiedPath = certificateController.copyCertificate(certificate, destinationPath);
             showSuccess(message, "Certificate copy saved to " + copiedPath);
         } catch (IOException exception) {
             showError(message, "Unable to save certificate copy.");
         }
     }
 
-    private static Path resolveCertificatePath(Certificate certificate, Label message) {
+    private Path resolveCertificatePath(Certificate certificate, Label message) {
         try {
-            return CertificateFileUtil.resolveExisting(certificate.certificatePath());
+            return certificateController.resolveCertificatePath(certificate);
         } catch (IOException exception) {
             showError(message, exception.getMessage());
             return null;

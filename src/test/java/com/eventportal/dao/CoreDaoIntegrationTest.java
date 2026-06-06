@@ -56,6 +56,7 @@ class CoreDaoIntegrationTest {
     void tearDown() throws SQLException {
         if (databaseConnection != null) {
             resetDatabase();
+            databaseConnection.close();
         }
     }
 

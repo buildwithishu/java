@@ -128,6 +128,22 @@ class CertificateControllerTest {
         verifyNoInteractions(userDAO, notificationController);
     }
 
+    @Test
+    void resolveCertificatePath_shouldConstrainStoredPathToConfiguredDirectory() throws Exception {
+        Path generated = certificateDirectory.resolve("generated.pdf");
+        Files.writeString(generated, "certificate");
+        Certificate certificate = new Certificate(31, 21, generated.toString(), OffsetDateTime.now());
+
+        assertThat(certificateController.resolveCertificatePath(certificate)).isEqualTo(generated.toRealPath());
+
+        Path outside = certificateDirectory.getParent().resolve("outside.pdf");
+        Files.writeString(outside, "outside");
+        Certificate escaped = new Certificate(32, 22, outside.toString(), OffsetDateTime.now());
+        assertThatThrownBy(() -> certificateController.resolveCertificatePath(escaped))
+                .isInstanceOf(java.io.IOException.class)
+                .hasMessageContaining("outside");
+    }
+
     private static User student(long id) {
         return new User(
                 id,

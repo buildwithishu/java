@@ -16,6 +16,15 @@ class ValidationUtilTest {
     @Test
     void isValidEmail_shouldRejectInvalidAddress() {
         assertThat(ValidationUtil.isValidEmail("student-at-college")).isFalse();
+        assertThat(ValidationUtil.isValidEmail("a".repeat(110) + "@college.edu")).isFalse();
+    }
+
+    @Test
+    void isValidUsername_shouldEnforceSafeDatabaseLengthAndCharacters() {
+        assertThat(ValidationUtil.isValidUsername("student_01")).isTrue();
+        assertThat(ValidationUtil.isValidUsername("ab")).isFalse();
+        assertThat(ValidationUtil.isValidUsername("student name")).isFalse();
+        assertThat(ValidationUtil.isValidUsername("s".repeat(51))).isFalse();
     }
 
     @Test
@@ -23,6 +32,7 @@ class ValidationUtilTest {
         assertThat(ValidationUtil.isStrongPassword("admin123")).isTrue();
         assertThat(ValidationUtil.isStrongPassword("password")).isFalse();
         assertThat(ValidationUtil.isStrongPassword("12345678")).isFalse();
+        assertThat(ValidationUtil.isStrongPassword("a1" + "x".repeat(71))).isFalse();
     }
 
     @Test

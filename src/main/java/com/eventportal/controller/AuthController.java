@@ -25,6 +25,9 @@ public class AuthController {
         if (ValidationUtil.isBlank(username) || ValidationUtil.isBlank(password)) {
             throw new IllegalArgumentException("Username and password are required");
         }
+        if (!ValidationUtil.isValidUsername(username.trim()) || !ValidationUtil.hasMaxLength(password, 72)) {
+            throw new IllegalArgumentException("Invalid username or password");
+        }
 
         Optional<User> user = userDAO.findByUsername(username.trim());
         if (user.isEmpty() || !PasswordHasher.verify(password, user.get().passwordHash())) {
@@ -41,6 +44,7 @@ public class AuthController {
         String normalizedFullName = normalizeRequiredText(fullName);
         String normalizedDepartment = normalizeOptionalText(department);
         validateRegistration(normalizedUsername, normalizedEmail, password, normalizedFullName);
+        validateDepartment(normalizedDepartment);
 
         if (userDAO.findByUsername(normalizedUsername).isPresent()) {
             throw new IllegalArgumentException("Username is already registered");
@@ -68,17 +72,26 @@ public class AuthController {
     }
 
     private static void validateRegistration(String username, String email, String password, String fullName) {
-        if (ValidationUtil.isBlank(username)) {
-            throw new IllegalArgumentException("Username is required");
+        if (!ValidationUtil.isValidUsername(username)) {
+            throw new IllegalArgumentException("Username must be 3-50 letters, digits, dots, underscores, or hyphens");
         }
         if (!ValidationUtil.isValidEmail(email)) {
-            throw new IllegalArgumentException("A valid email is required");
+            throw new IllegalArgumentException("A valid email of at most 120 characters is required");
         }
         if (!ValidationUtil.isStrongPassword(password)) {
-            throw new IllegalArgumentException("Password must be at least 8 characters and include letters and digits");
+            throw new IllegalArgumentException("Password must be 8-72 characters and include letters and digits");
         }
         if (ValidationUtil.isBlank(fullName)) {
             throw new IllegalArgumentException("Full name is required");
+        }
+        if (!ValidationUtil.hasMaxLength(fullName, 120)) {
+            throw new IllegalArgumentException("Full name must be at most 120 characters");
+        }
+    }
+
+    private static void validateDepartment(String department) {
+        if (department != null && !ValidationUtil.hasMaxLength(department, 120)) {
+            throw new IllegalArgumentException("Department must be at most 120 characters");
         }
     }
 
