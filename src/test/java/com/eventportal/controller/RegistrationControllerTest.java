@@ -7,6 +7,7 @@ import com.eventportal.model.Event;
 import com.eventportal.model.EventCategory;
 import com.eventportal.model.EventStatus;
 import com.eventportal.model.Registration;
+import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.RegistrationStatus;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
@@ -151,6 +152,83 @@ class RegistrationControllerTest {
         verifyNoInteractions(userDAO);
     }
 
+    @Test
+    void cancelRegistration_shouldNotNotifyWhenDaoDoesNotCancel() throws SQLException {
+        User student = user(7, Role.STUDENT);
+        Event event = event(12, EventStatus.UPCOMING, 3, 40);
+        Registration registration = registration(21, student.id(), event.id(), RegistrationStatus.CONFIRMED);
+        sessionManager.login(student);
+        when(registrationDAO.findByUser(student.id())).thenReturn(List.of(registration));
+        when(eventDAO.findById(event.id())).thenReturn(Optional.of(event));
+        when(registrationDAO.cancelRegistration(registration.id())).thenReturn(false);
+
+        assertThat(registrationController.cancelRegistration(registration.id())).isFalse();
+        verifyNoInteractions(notificationController);
+    }
+
+    @Test
+    void cancelMyRegistrationForEvent_shouldFindActiveRegistration() throws SQLException {
+        User student = user(7, Role.STUDENT);
+        Event event = event(12, EventStatus.UPCOMING, 3, 40);
+        Registration cancelled = registration(20, student.id(), event.id(), RegistrationStatus.CANCELLED);
+        Registration active = registration(21, student.id(), event.id(), RegistrationStatus.CONFIRMED);
+        sessionManager.login(student);
+        when(registrationDAO.findByUser(student.id())).thenReturn(List.of(cancelled, active));
+        when(eventDAO.findById(event.id())).thenReturn(Optional.of(event));
+        when(registrationDAO.cancelRegistration(active.id())).thenReturn(true);
+
+        assertThat(registrationController.cancelMyRegistrationForEvent(event.id())).isTrue();
+        verify(registrationDAO).cancelRegistration(active.id());
+    }
+
+    @Test
+    void cancelMyRegistrationForEvent_shouldRejectMissingActiveRegistration() throws SQLException {
+        User student = user(7, Role.STUDENT);
+        Registration cancelled = registration(20, student.id(), 12, RegistrationStatus.CANCELLED);
+        sessionManager.login(student);
+        when(registrationDAO.findByUser(student.id())).thenReturn(List.of(cancelled));
+
+        assertThatThrownBy(() -> registrationController.cancelMyRegistrationForEvent(12))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Active registration not found");
+    }
+
+    @Test
+    void studentQueries_shouldUseCurrentStudentId() throws SQLException {
+        User student = user(7, Role.STUDENT);
+        Registration registration = registration(21, student.id(), 12, RegistrationStatus.CONFIRMED);
+        RegistrationDetail detail = registrationDetail(registration);
+        sessionManager.login(student);
+        when(registrationDAO.findByUser(student.id())).thenReturn(List.of(registration));
+        when(registrationDAO.findDetailsByUser(student.id())).thenReturn(List.of(detail));
+        when(registrationDAO.isAlreadyRegistered(student.id(), 12)).thenReturn(true);
+
+        assertThat(registrationController.findMyRegistrations()).containsExactly(registration);
+        assertThat(registrationController.findMyRegistrationDetails()).containsExactly(detail);
+        assertThat(registrationController.isAlreadyRegistered(12)).isTrue();
+    }
+
+    @Test
+    void adminQueries_shouldDelegateForAuthenticatedAdmin() throws SQLException {
+        User admin = user(1, Role.ADMIN);
+        User student = user(7, Role.STUDENT);
+        Registration registration = registration(21, student.id(), 12, RegistrationStatus.CONFIRMED);
+        sessionManager.login(admin);
+        when(registrationDAO.findByEvent(12)).thenReturn(List.of(registration));
+        when(userDAO.findRegisteredUsersByEvent(12)).thenReturn(List.of(student));
+
+        assertThat(registrationController.findRegistrationsForEvent(12)).containsExactly(registration);
+        assertThat(registrationController.findRegisteredUsersForEvent(12)).containsExactly(student);
+    }
+
+    @Test
+    void studentOperations_shouldRequireLogin() {
+        assertThatThrownBy(() -> registrationController.findMyRegistrations())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Login is required");
+        verifyNoInteractions(registrationDAO);
+    }
+
     private static Event event(long id, EventStatus status, int registeredCount, int capacity) {
         OffsetDateTime now = OffsetDateTime.now();
         return new Event(
@@ -178,6 +256,20 @@ class RegistrationControllerTest {
             RegistrationStatus status
     ) {
         return new Registration(id, userId, eventId, OffsetDateTime.now(), "REG-12-7-ABC12345", status);
+    }
+
+    private static RegistrationDetail registrationDetail(Registration registration) {
+        return new RegistrationDetail(
+                registration.id(),
+                registration.eventId(),
+                registration.uniqueRegId(),
+                registration.status(),
+                registration.registrationDate(),
+                "Code Sprint",
+                EventStatus.UPCOMING,
+                LocalDate.now().plusDays(5),
+                "Lab Block"
+        );
     }
 
     private static User user(long id, Role role) {
