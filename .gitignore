@@ -4,6 +4,7 @@ target/
 *.class
 .mvn/apache-maven-*/
 .mvn/apache-maven-*.tar.gz
+.mvn/apache-maven-*.tar.gz.sha512
 
 # IDE
 .idea/

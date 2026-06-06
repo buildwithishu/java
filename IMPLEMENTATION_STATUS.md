@@ -112,3 +112,6 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Verified certificate file copy utility with `javac`; JUnit/JavaFX verification remains Maven-bound.
 - 2026-06-06: Added color-coded status badges to event browsing cards.
 - 2026-06-06: Verification note: event status badge UI requires JavaFX/Maven; local `mvn` remains unavailable.
+- 2026-06-06: Updated the Maven bootstrapper to current Maven 3.9.16 with SHA-512 verification and routed Make targets through it.
+- 2026-06-06: Removed the unresolved JFreeChart FX dependency; analytics use JavaFX's built-in chart controls.
+- 2026-06-06: Verified all 27 tests and the shaded package; stabilized the JAR name for deterministic Docker image assembly.

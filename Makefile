@@ -18,19 +18,19 @@ db-reset: ## Reset database volumes and recreate seed data
 	docker compose up -d postgres
 
 app-run: ## Run the JavaFX application locally
-	mvn javafx:run
+	./mvnw javafx:run
 
 app-build: ## Build the JAR package
-	mvn clean package
+	./mvnw clean package
 
 app-jar: ## Build fat JAR for distribution
-	mvn clean package -DskipTests
+	./mvnw clean package -DskipTests
 
 clean: ## Clean build artifacts
-	mvn clean
+	./mvnw clean
 
 test: ## Run unit tests
-	mvn test
+	./mvnw test
 
 docker-build: ## Build the Docker image
 	docker build -t college-event-portal:local .

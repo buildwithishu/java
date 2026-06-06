@@ -6,7 +6,7 @@ A JavaFX desktop application for managing college events, student registrations,
 
 | Area | Technology |
 |------|------------|
-| UI | JavaFX 21, AtlantaFX |
+| UI | JavaFX 21 charts and controls, AtlantaFX |
 | Backend | Java 17+, JDBC |
 | Database | PostgreSQL 16 |
 | Build | Maven |
@@ -37,7 +37,7 @@ A JavaFX desktop application for managing college events, student registrations,
 ## Prerequisites
 
 - JDK 17 or newer. CI uses JDK 21.
-- Maven 3.9 or newer.
+- Maven 3.9 or newer, or the included `./mvnw` bootstrap script.
 - Docker Desktop or Docker Engine for local PostgreSQL.
 
 ## Local Services
