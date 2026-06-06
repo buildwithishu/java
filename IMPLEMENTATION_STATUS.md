@@ -143,3 +143,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Expanded event-controller tests for creation, validation, lifecycle, deletion, queries, organizer lookup, reminders, notifications, and authorization.
 - 2026-06-06: Removed AtlantaFX's redundant JavaFX 20 transitive metadata; the build now resolves the project's explicit JavaFX 21 dependencies without model warnings.
 - 2026-06-06: Reconciled implementation status with verified evidence and recorded the remaining coverage and environment-validation work.
+- 2026-06-06: Added JavaFX-thread smoke coverage for every planned view and configured CI to run UI tests under Xvfb.

@@ -58,7 +58,7 @@ jobs:
         run: mvn -B clean compile
 
       - name: Test, package, and report coverage
-        run: mvn -B verify -P headless
+        run: xvfb-run -a mvn -B verify -P headless
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
