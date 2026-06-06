@@ -8,6 +8,7 @@ import com.eventportal.model.DashboardSummary;
 import com.eventportal.model.MonthlyRegistrationStat;
 import com.eventportal.model.PopularEventStat;
 import com.eventportal.model.User;
+import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
 import com.eventportal.util.SessionManager;
 import javafx.geometry.Insets;
@@ -24,8 +25,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
-import java.sql.SQLException;
 
 public class AdminDashboardView {
     private final User user;
@@ -93,31 +92,38 @@ public class AdminDashboardView {
     }
 
     private Parent dashboardBody() {
-        try {
-            DashboardSummary summary = dashboardController.loadAdminSummary();
-            VBox content = new VBox(
-                    18,
-                    statGrid(summary),
-                    categorySection(summary),
-                    monthlyRegistrationSection(summary),
-                    popularEventsSection(summary)
-            );
-            content.getStyleClass().add("content-panel-wide");
-            content.setPadding(new Insets(20));
+        VBox container = new VBox(label("Loading dashboard...", "muted-text"));
+        container.getStyleClass().add("content-panel-wide");
+        container.setAlignment(Pos.CENTER);
+        container.setPadding(new Insets(32));
+        FxTaskRunner.run(
+                "admin-dashboard-loader",
+                dashboardController::loadAdminSummary,
+                summary -> {
+                    container.setAlignment(Pos.TOP_LEFT);
+                    container.getChildren().setAll(dashboardContent(summary));
+                },
+                failure -> container.getChildren().setAll(label(
+                        "Unable to load dashboard. Start PostgreSQL and try again.",
+                        "error-text"
+                ))
+        );
+        return container;
+    }
 
-            ScrollPane scrollPane = new ScrollPane(content);
-            scrollPane.setFitToWidth(true);
-            scrollPane.getStyleClass().add("transparent-scroll");
-            return scrollPane;
-        } catch (SQLException exception) {
-            Label error = new Label("Unable to load dashboard. Start PostgreSQL and try again.");
-            error.getStyleClass().add("error-text");
-            VBox errorBox = new VBox(error);
-            errorBox.getStyleClass().add("content-panel-wide");
-            errorBox.setAlignment(Pos.CENTER);
-            errorBox.setPadding(new Insets(32));
-            return errorBox;
-        }
+    private static Parent dashboardContent(DashboardSummary summary) {
+        VBox content = new VBox(
+                18,
+                statGrid(summary),
+                categorySection(summary),
+                monthlyRegistrationSection(summary),
+                popularEventsSection(summary)
+        );
+
+        ScrollPane scrollPane = new ScrollPane(content);
+        scrollPane.setFitToWidth(true);
+        scrollPane.getStyleClass().add("transparent-scroll");
+        return scrollPane;
     }
 
     private static Parent statGrid(DashboardSummary summary) {
@@ -221,5 +227,11 @@ public class AdminDashboardView {
         card.setPadding(new Insets(18));
         card.setMinWidth(180);
         return card;
+    }
+
+    private static Label label(String text, String styleClass) {
+        Label label = new Label(text);
+        label.getStyleClass().add(styleClass);
+        return label;
     }
 }

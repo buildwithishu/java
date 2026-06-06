@@ -4,9 +4,9 @@ import com.eventportal.controller.CertificateController;
 import com.eventportal.controller.EventController;
 import com.eventportal.controller.NotificationController;
 import com.eventportal.controller.RegistrationController;
-import com.eventportal.model.Event;
 import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.User;
+import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
 import com.eventportal.util.SessionManager;
 import javafx.geometry.Insets;
@@ -18,7 +18,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public class StudentDashboardView {
@@ -77,27 +76,37 @@ public class StudentDashboardView {
     }
 
     private Parent quickStats() {
-        try {
-            List<RegistrationDetail> registrations = registrationController.findMyRegistrationDetails();
-            long activeRegistrations = registrations.stream()
-                    .filter(RegistrationDetail::isActive)
-                    .count();
-            int certificateCount = certificateController.findMyCertificates().size();
-            int unreadNotifications = notificationController.countUnread(user.id());
+        VBox container = new VBox(label("Loading quick stats...", "muted-text"));
+        container.setPadding(new Insets(10, 0, 0, 0));
+        FxTaskRunner.run(
+                "student-stats-loader",
+                this::loadQuickStats,
+                stats -> container.getChildren().setAll(quickStatsRow(stats)),
+                failure -> container.getChildren().setAll(label(
+                        "Quick stats unavailable until PostgreSQL is running.",
+                        "error-text"
+                ))
+        );
+        return container;
+    }
 
-            HBox stats = new HBox(
-                    12,
-                    statCard("Registered Events", activeRegistrations),
-                    statCard("Certificates", certificateCount),
-                    statCard("Unread Notifications", unreadNotifications)
-            );
-            stats.setPadding(new Insets(10, 0, 0, 0));
-            return stats;
-        } catch (SQLException exception) {
-            Label error = new Label("Quick stats unavailable until PostgreSQL is running.");
-            error.getStyleClass().add("error-text");
-            return error;
-        }
+    private StudentStats loadQuickStats() throws Exception {
+        List<RegistrationDetail> registrations = registrationController.findMyRegistrationDetails();
+        long activeRegistrations = registrations.stream()
+                .filter(RegistrationDetail::isActive)
+                .count();
+        int certificateCount = certificateController.findMyCertificates().size();
+        int unreadNotifications = notificationController.countUnread(user.id());
+        return new StudentStats(activeRegistrations, certificateCount, unreadNotifications);
+    }
+
+    private static Parent quickStatsRow(StudentStats stats) {
+        return new HBox(
+                12,
+                statCard("Registered Events", stats.activeRegistrations()),
+                statCard("Certificates", stats.certificateCount()),
+                statCard("Unread Notifications", stats.unreadNotifications())
+        );
     }
 
     private Parent sidebar() {
@@ -139,18 +148,27 @@ public class StudentDashboardView {
     }
 
     private void showUpcomingEvents() {
-        Parent eventList;
-        try {
-            List<Event> upcomingEvents = eventController.findUpcomingEvents();
-            eventList = new EventListView(registrationController, eventController, navigationManager, user, upcomingEvents).build();
-        } catch (SQLException exception) {
-            Label error = new Label("Unable to load events. Start PostgreSQL and try again.");
-            error.getStyleClass().add("error-text");
-            VBox errorBox = new VBox(error);
-            errorBox.setAlignment(Pos.CENTER);
-            eventList = errorBox;
-        }
+        VBox eventList = new VBox(label("Loading upcoming events...", "muted-text"));
+        eventList.setAlignment(Pos.CENTER);
         setContent("Upcoming Events", eventList);
+        FxTaskRunner.run(
+                "upcoming-event-loader",
+                eventController::findUpcomingEvents,
+                upcomingEvents -> {
+                    eventList.setAlignment(Pos.TOP_LEFT);
+                    eventList.getChildren().setAll(new EventListView(
+                            registrationController,
+                            eventController,
+                            navigationManager,
+                            user,
+                            upcomingEvents
+                    ).build());
+                },
+                failure -> eventList.getChildren().setAll(label(
+                        "Unable to load events. Start PostgreSQL and try again.",
+                        "error-text"
+                ))
+        );
     }
 
     private void setContent(String title, Parent body) {
@@ -175,5 +193,14 @@ public class StudentDashboardView {
         card.setPadding(new Insets(12));
         card.setMinWidth(150);
         return card;
+    }
+
+    private static Label label(String text, String styleClass) {
+        Label label = new Label(text);
+        label.getStyleClass().add(styleClass);
+        return label;
+    }
+
+    private record StudentStats(long activeRegistrations, int certificateCount, int unreadNotifications) {
     }
 }
