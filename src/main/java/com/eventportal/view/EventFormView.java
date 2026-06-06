@@ -3,6 +3,7 @@ package com.eventportal.view;
 import com.eventportal.controller.EventController;
 import com.eventportal.model.Event;
 import com.eventportal.model.EventCategory;
+import com.eventportal.util.FxTaskRunner;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -16,8 +17,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.sql.SQLException;
 import java.time.LocalTime;
+import java.util.concurrent.Callable;
 
 public class EventFormView {
     private final EventController eventController;
@@ -83,6 +84,7 @@ public class EventFormView {
                 startTimeField,
                 endTimeField,
                 capacitySpinner,
+                saveButton,
                 messageLabel
         ));
 
@@ -113,24 +115,32 @@ public class EventFormView {
             TextField startTimeField,
             TextField endTimeField,
             Spinner<Integer> capacitySpinner,
+            Button saveButton,
             Label messageLabel
     ) {
+        Callable<Event> saveOperation;
         try {
             if (existingEvent == null) {
-                eventController.createEvent(
-                        titleField.getText(),
-                        descriptionArea.getText(),
-                        categoryBox.getValue(),
-                        venueField.getText(),
-                        datePicker.getValue(),
-                        LocalTime.parse(startTimeField.getText().trim()),
-                        LocalTime.parse(endTimeField.getText().trim()),
-                        capacitySpinner.getValue()
+                String title = titleField.getText();
+                String description = descriptionArea.getText();
+                EventCategory category = categoryBox.getValue();
+                String venue = venueField.getText();
+                java.time.LocalDate eventDate = datePicker.getValue();
+                LocalTime startTime = LocalTime.parse(startTimeField.getText().trim());
+                LocalTime endTime = LocalTime.parse(endTimeField.getText().trim());
+                int capacity = capacitySpinner.getValue();
+                saveOperation = () -> eventController.createEvent(
+                        title,
+                        description,
+                        category,
+                        venue,
+                        eventDate,
+                        startTime,
+                        endTime,
+                        capacity
                 );
-                clearForm(titleField, descriptionArea, venueField, datePicker, startTimeField, endTimeField);
-                showSuccess(messageLabel, "Event created.");
             } else {
-                eventController.updateEvent(new Event(
+                Event updatedEvent = new Event(
                         existingEvent.id(),
                         titleField.getText().trim(),
                         descriptionArea.getText().trim(),
@@ -145,15 +155,45 @@ public class EventFormView {
                         existingEvent.createdBy(),
                         existingEvent.createdAt(),
                         existingEvent.updatedAt()
-                ));
-                showSuccess(messageLabel, "Event updated.");
+                );
+                saveOperation = () -> eventController.updateEvent(updatedEvent);
             }
-            refreshHandler.run();
-        } catch (SQLException exception) {
-            showError(messageLabel, "Unable to save event. Start PostgreSQL and try again.");
         } catch (RuntimeException exception) {
             showError(messageLabel, exception.getMessage() == null ? "Invalid event details." : exception.getMessage());
+            return;
         }
+
+        saveButton.setDisable(true);
+        FxTaskRunner.run(
+                "event-form-saver",
+                saveOperation,
+                savedEvent -> {
+                    saveButton.setDisable(false);
+                    if (existingEvent == null) {
+                        clearForm(
+                                titleField,
+                                descriptionArea,
+                                venueField,
+                                datePicker,
+                                startTimeField,
+                                endTimeField
+                        );
+                        showSuccess(messageLabel, "Event created.");
+                    } else {
+                        showSuccess(messageLabel, "Event updated.");
+                    }
+                    refreshHandler.run();
+                },
+                failure -> {
+                    saveButton.setDisable(false);
+                    showError(
+                            messageLabel,
+                            failure instanceof IllegalArgumentException || failure instanceof IllegalStateException
+                                    ? failure.getMessage()
+                                    : "Unable to save event. Start PostgreSQL and try again."
+                    );
+                }
+        );
     }
 
     private void populateForm(

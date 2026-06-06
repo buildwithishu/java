@@ -128,3 +128,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Moved student registration, certificate, preview, and notification database work off the JavaFX application thread.
 - 2026-06-06: Moved student/admin dashboard and report aggregation off the JavaFX application thread with loading states.
 - 2026-06-06: Moved event registration, organizer, registration-status, cancellation, and attendee lookups off the JavaFX application thread.
+- 2026-06-06: Moved admin event loading, create/edit, lifecycle, reminder, cancellation, and deletion operations off the JavaFX application thread.

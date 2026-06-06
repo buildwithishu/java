@@ -3,8 +3,10 @@ package com.eventportal.view;
 import com.eventportal.controller.EventController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
+import com.eventportal.model.EventStatus;
 import com.eventportal.model.User;
 import com.eventportal.util.DateTimeUtil;
+import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,8 +19,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 public class AdminEventManagementView {
     private final EventController eventController;
@@ -69,21 +72,25 @@ public class AdminEventManagementView {
 
     private void refreshEvents(VBox formContainer, VBox listContainer) {
         listContainer.getChildren().clear();
-        try {
-            List<Event> events = eventController.findAllEvents();
-            if (events.isEmpty()) {
-                Label empty = new Label("No events have been created yet.");
-                empty.getStyleClass().add("muted-text");
-                listContainer.getChildren().add(empty);
-                return;
-            }
-            for (Event event : events) {
-                listContainer.getChildren().add(eventRow(event, formContainer, listContainer));
-            }
-        } catch (SQLException exception) {
-            Label error = new Label("Unable to load events. Start PostgreSQL and try again.");
-            error.getStyleClass().add("error-text");
-            listContainer.getChildren().add(error);
+        listContainer.getChildren().add(label("Loading events...", "muted-text"));
+        FxTaskRunner.run(
+                "admin-event-loader",
+                eventController::findAllEvents,
+                events -> renderEvents(events, formContainer, listContainer),
+                failure -> listContainer.getChildren().setAll(errorLabel(
+                        "Unable to load events. Start PostgreSQL and try again."
+                ))
+        );
+    }
+
+    private void renderEvents(List<Event> events, VBox formContainer, VBox listContainer) {
+        listContainer.getChildren().clear();
+        if (events.isEmpty()) {
+            listContainer.getChildren().add(label("No events have been created yet.", "muted-text"));
+            return;
+        }
+        for (Event event : events) {
+            listContainer.getChildren().add(eventRow(event, formContainer, listContainer));
         }
     }
 
@@ -101,16 +108,33 @@ public class AdminEventManagementView {
         HBox.setHgrow(text, Priority.ALWAYS);
 
         Button cancelButton = new Button("Cancel Event");
-        cancelButton.setDisable(event.status().name().equals("CANCELLED"));
-        cancelButton.setOnAction(action -> cancelEvent(event.id(), formContainer, listContainer));
+        cancelButton.setDisable(event.status() == EventStatus.CANCELLED || event.status() == EventStatus.COMPLETED);
+        cancelButton.setOnAction(action -> cancelEvent(
+                event.id(),
+                cancelButton,
+                formContainer,
+                listContainer
+        ));
 
         Button ongoingButton = new Button("Start");
-        ongoingButton.setDisable(!event.status().name().equals("UPCOMING"));
-        ongoingButton.setOnAction(action -> changeStatus(event.id(), "ONGOING", formContainer, listContainer));
+        ongoingButton.setDisable(event.status() != EventStatus.UPCOMING);
+        ongoingButton.setOnAction(action -> changeStatus(
+                event.id(),
+                EventStatus.ONGOING,
+                ongoingButton,
+                formContainer,
+                listContainer
+        ));
 
         Button completeButton = new Button("Complete");
-        completeButton.setDisable(event.status().name().equals("COMPLETED") || event.status().name().equals("CANCELLED"));
-        completeButton.setOnAction(action -> changeStatus(event.id(), "COMPLETED", formContainer, listContainer));
+        completeButton.setDisable(event.status() != EventStatus.ONGOING);
+        completeButton.setOnAction(action -> changeStatus(
+                event.id(),
+                EventStatus.COMPLETED,
+                completeButton,
+                formContainer,
+                listContainer
+        ));
 
         Button detailsButton = new Button("Details");
         detailsButton.setOnAction(action -> navigationManager.show(new EventDetailView(
@@ -122,16 +146,21 @@ public class AdminEventManagementView {
         ).build()));
 
         Button editButton = new Button("Edit");
-        editButton.setDisable(event.status().name().equals("COMPLETED"));
+        editButton.setDisable(event.status() == EventStatus.COMPLETED || event.status() == EventStatus.CANCELLED);
         editButton.setOnAction(action -> showEditForm(event, formContainer, listContainer));
 
         Button deleteButton = new Button("Delete");
         deleteButton.setDisable(event.registeredCount() > 0);
-        deleteButton.setOnAction(action -> deleteEvent(event.id(), formContainer, listContainer));
+        deleteButton.setOnAction(action -> deleteEvent(
+                event.id(),
+                deleteButton,
+                formContainer,
+                listContainer
+        ));
 
         Button reminderButton = new Button("Send Reminder");
-        reminderButton.setDisable(!event.status().name().equals("UPCOMING") || event.registeredCount() == 0);
-        reminderButton.setOnAction(action -> sendReminders(event.id(), listContainer));
+        reminderButton.setDisable(event.status() != EventStatus.UPCOMING || event.registeredCount() == 0);
+        reminderButton.setOnAction(action -> sendReminders(event.id(), reminderButton, listContainer));
 
         FlowPane actions = new FlowPane(8, 8);
         actions.getChildren().addAll(
@@ -157,55 +186,90 @@ public class AdminEventManagementView {
         formContainer.getChildren().setAll(new EventFormView(eventController, refresh, event).build());
     }
 
-    private void deleteEvent(long eventId, VBox formContainer, VBox listContainer) {
-        try {
-            eventController.deleteEvent(eventId);
-            refreshEvents(formContainer, listContainer);
-        } catch (SQLException exception) {
-            listContainer.getChildren().add(errorLabel("Unable to delete event. Database unavailable."));
-        } catch (RuntimeException exception) {
-            listContainer.getChildren().add(errorLabel(exception.getMessage()));
-        }
+    private void deleteEvent(long eventId, Button source, VBox formContainer, VBox listContainer) {
+        runAction(
+                "event-deleter",
+                source,
+                () -> eventController.deleteEvent(eventId),
+                deleted -> refreshEvents(formContainer, listContainer),
+                "Unable to delete event. Database unavailable.",
+                listContainer
+        );
     }
 
-    private void sendReminders(long eventId, VBox listContainer) {
-        try {
-            int remindersCreated = eventController.sendEventReminders(eventId);
-            String message = remindersCreated == 0
-                    ? "Reminders were already sent to all active registrants."
-                    : "Sent " + remindersCreated + " event reminder(s).";
-            listContainer.getChildren().add(label(message, "success-text"));
-        } catch (SQLException exception) {
-            listContainer.getChildren().add(errorLabel("Unable to send reminders. Database unavailable."));
-        } catch (RuntimeException exception) {
-            listContainer.getChildren().add(errorLabel(exception.getMessage()));
-        }
+    private void sendReminders(long eventId, Button source, VBox listContainer) {
+        runAction(
+                "event-reminder-sender",
+                source,
+                () -> eventController.sendEventReminders(eventId),
+                remindersCreated -> {
+                    String message = remindersCreated == 0
+                            ? "Reminders were already sent to all active registrants."
+                            : "Sent " + remindersCreated + " event reminder(s).";
+                    listContainer.getChildren().add(label(message, "success-text"));
+                },
+                "Unable to send reminders. Database unavailable.",
+                listContainer
+        );
     }
 
-    private void cancelEvent(long eventId, VBox formContainer, VBox listContainer) {
-        try {
-            eventController.cancelEvent(eventId);
-            refreshEvents(formContainer, listContainer);
-        } catch (SQLException exception) {
-            listContainer.getChildren().add(errorLabel("Unable to cancel event. Database unavailable."));
-        } catch (RuntimeException exception) {
-            listContainer.getChildren().add(errorLabel(exception.getMessage()));
-        }
+    private void cancelEvent(long eventId, Button source, VBox formContainer, VBox listContainer) {
+        runAction(
+                "event-canceller",
+                source,
+                () -> eventController.cancelEvent(eventId),
+                cancelled -> refreshEvents(formContainer, listContainer),
+                "Unable to cancel event. Database unavailable.",
+                listContainer
+        );
     }
 
-    private void changeStatus(long eventId, String status, VBox formContainer, VBox listContainer) {
-        try {
-            if ("ONGOING".equals(status)) {
-                eventController.markOngoing(eventId);
-            } else {
-                eventController.markCompleted(eventId);
-            }
-            refreshEvents(formContainer, listContainer);
-        } catch (SQLException exception) {
-            listContainer.getChildren().add(errorLabel("Unable to update event. Database unavailable."));
-        } catch (RuntimeException exception) {
-            listContainer.getChildren().add(errorLabel(exception.getMessage()));
-        }
+    private void changeStatus(
+            long eventId,
+            EventStatus status,
+            Button source,
+            VBox formContainer,
+            VBox listContainer
+    ) {
+        runAction(
+                "event-status-updater",
+                source,
+                () -> status == EventStatus.ONGOING
+                        ? eventController.markOngoing(eventId)
+                        : eventController.markCompleted(eventId),
+                updated -> refreshEvents(formContainer, listContainer),
+                "Unable to update event. Database unavailable.",
+                listContainer
+        );
+    }
+
+    private static <T> void runAction(
+            String taskName,
+            Button source,
+            Callable<T> operation,
+            Consumer<T> onSuccess,
+            String fallbackMessage,
+            VBox listContainer
+    ) {
+        source.setDisable(true);
+        FxTaskRunner.run(
+                taskName,
+                operation,
+                result -> {
+                    source.setDisable(false);
+                    onSuccess.accept(result);
+                },
+                failure -> {
+                    source.setDisable(false);
+                    listContainer.getChildren().add(errorLabel(operationMessage(failure, fallbackMessage)));
+                }
+        );
+    }
+
+    private static String operationMessage(Throwable failure, String fallback) {
+        return failure instanceof IllegalArgumentException || failure instanceof IllegalStateException
+                ? failure.getMessage()
+                : fallback;
     }
 
     private static Label errorLabel(String message) {
