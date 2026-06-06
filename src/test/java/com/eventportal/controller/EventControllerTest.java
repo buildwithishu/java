@@ -82,6 +82,16 @@ class EventControllerTest {
         verify(eventDAO, never()).updateEvent(org.mockito.ArgumentMatchers.any(Event.class));
     }
 
+    @Test
+    void updateEvent_shouldRejectCancelledEvent() throws SQLException {
+        Event cancelled = event(EventStatus.CANCELLED);
+
+        assertThatThrownBy(() -> eventController.updateEvent(cancelled))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Cancelled events");
+        verify(eventDAO, never()).updateEvent(org.mockito.ArgumentMatchers.any(Event.class));
+    }
+
     private static Event event(EventStatus status) {
         OffsetDateTime now = OffsetDateTime.now();
         return new Event(

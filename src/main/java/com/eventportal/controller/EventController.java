@@ -83,6 +83,9 @@ public class EventController {
         if (event.status() == EventStatus.COMPLETED) {
             throw new IllegalArgumentException("Completed events cannot be edited");
         }
+        if (event.status() == EventStatus.CANCELLED) {
+            throw new IllegalArgumentException("Cancelled events cannot be edited");
+        }
         validateEventInput(
                 event.title(),
                 event.description(),
