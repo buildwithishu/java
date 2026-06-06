@@ -100,6 +100,7 @@ public class EventController {
         requireAdmin();
         Event event = eventDAO.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
+        requireValidTransition(event.status(), EventStatus.CANCELLED);
 
         Event cancelled = new Event(
                 event.id(),
@@ -195,9 +196,7 @@ public class EventController {
         requireAdmin();
         Event event = eventDAO.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + eventId));
-        if (event.status() == EventStatus.CANCELLED) {
-            throw new IllegalArgumentException("Cancelled events cannot change status");
-        }
+        requireValidTransition(event.status(), nextStatus);
         Event updated = new Event(
                 event.id(),
                 event.title(),
@@ -215,6 +214,14 @@ public class EventController {
                 OffsetDateTime.now()
         );
         return eventDAO.updateEvent(updated);
+    }
+
+    private static void requireValidTransition(EventStatus currentStatus, EventStatus nextStatus) {
+        if (!currentStatus.canTransitionTo(nextStatus)) {
+            throw new IllegalArgumentException(
+                    "Event status cannot change from " + currentStatus + " to " + nextStatus
+            );
+        }
     }
 
     private void notifyEventCancellation(Event event) throws SQLException {

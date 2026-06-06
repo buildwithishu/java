@@ -115,3 +115,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Updated the Maven bootstrapper to current Maven 3.9.16 with SHA-512 verification and routed Make targets through it.
 - 2026-06-06: Removed the unresolved JFreeChart FX dependency; analytics use JavaFX's built-in chart controls.
 - 2026-06-06: Verified all 27 tests and the shaded package; stabilized the JAR name for deterministic Docker image assembly.
+- 2026-06-06: Added event lifecycle state-machine tests covering valid progression and invalid terminal-state transitions.
