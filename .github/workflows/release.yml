@@ -27,7 +27,7 @@ jobs:
         run: mvn -B clean package -DskipTests
 
       - name: Generate checksums
-        run: sha256sum target/college-event-portal.jar > checksums.txt
+        run: sha256sum target/college-event-portal-all.jar > checksums.txt
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -47,5 +47,5 @@ jobs:
         with:
           generate_release_notes: true
           files: |
-            target/college-event-portal.jar
+            target/college-event-portal-all.jar
             checksums.txt

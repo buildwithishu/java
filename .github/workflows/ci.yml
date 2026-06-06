@@ -64,7 +64,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: college-event-portal-jar
-          path: target/college-event-portal.jar
+          path: target/college-event-portal-all.jar
 
       - name: Upload test reports
         if: always()

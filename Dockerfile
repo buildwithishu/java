@@ -10,6 +10,6 @@ RUN mvn clean package -DskipTests -P headless
 FROM eclipse-temurin:21-jre AS runtime
 
 WORKDIR /app
-COPY --from=builder /app/target/college-event-portal.jar app.jar
+COPY --from=builder /app/target/college-event-portal-all.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
