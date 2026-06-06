@@ -55,3 +55,55 @@ WHERE role = 'STUDENT'
       WHERE notifications.user_id = users.id
         AND notifications.title = 'Welcome to Event Portal'
   );
+
+INSERT INTO registrations (user_id, event_id, unique_reg_id, status)
+SELECT student.id,
+       event.id,
+       seed_registration.unique_reg_id,
+       'CONFIRMED'
+FROM (
+    VALUES
+        ('student1', 'Code Sprint 2026', DATE '2026-07-10', 'SEED-CODE-SPRINT-STUDENT1'),
+        ('student2', 'Cultural Night', DATE '2026-07-18', 'SEED-CULTURAL-NIGHT-STUDENT2')
+) AS seed_registration(username, event_title, event_date, unique_reg_id)
+JOIN users student ON student.username = seed_registration.username
+JOIN events event
+  ON event.title = seed_registration.event_title
+ AND event.event_date = seed_registration.event_date
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM registrations existing
+    WHERE existing.user_id = student.id
+      AND existing.event_id = event.id
+      AND existing.status = 'CONFIRMED'
+);
+
+UPDATE events event
+SET registered_count = (
+        SELECT COUNT(*)
+        FROM registrations registration
+        WHERE registration.event_id = event.id
+          AND registration.status = 'CONFIRMED'
+    ),
+    updated_at = CURRENT_TIMESTAMP
+WHERE EXISTS (
+    SELECT 1
+    FROM registrations registration
+    WHERE registration.event_id = event.id
+);
+
+INSERT INTO notifications (user_id, title, message, event_id)
+SELECT registration.user_id,
+       'Registration Confirmed',
+       'Your sample registration for ' || event.title || ' is confirmed.',
+       event.id
+FROM registrations registration
+JOIN events event ON event.id = registration.event_id
+WHERE registration.unique_reg_id LIKE 'SEED-%'
+  AND NOT EXISTS (
+      SELECT 1
+      FROM notifications existing
+      WHERE existing.user_id = registration.user_id
+        AND existing.event_id = event.id
+        AND existing.title = 'Registration Confirmed'
+  );

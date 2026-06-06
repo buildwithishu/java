@@ -3,6 +3,7 @@ package com.eventportal.view;
 import com.eventportal.controller.EventController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Event;
+import com.eventportal.model.EventStatus;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
 import com.eventportal.util.DateTimeUtil;
@@ -124,9 +125,12 @@ public class EventDetailView {
             boolean seatReleased
     ) {
         if (registered) {
-            actionButton.setText("Cancel Registration");
-            actionButton.setDisable(false);
-            actionButton.setOnAction(action -> cancelRegistration(actionButton, message));
+            boolean cancellationAvailable = event.status() == EventStatus.UPCOMING;
+            actionButton.setText(cancellationAvailable ? "Cancel Registration" : "Registration Confirmed");
+            actionButton.setDisable(!cancellationAvailable);
+            if (cancellationAvailable) {
+                actionButton.setOnAction(action -> cancelRegistration(actionButton, message));
+            }
             return;
         }
         actionButton.setText("Register");

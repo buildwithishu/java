@@ -4,6 +4,7 @@ import com.eventportal.dao.EventDAO;
 import com.eventportal.dao.RegistrationDAO;
 import com.eventportal.dao.UserDAO;
 import com.eventportal.model.Event;
+import com.eventportal.model.EventStatus;
 import com.eventportal.model.Registration;
 import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.Role;
@@ -60,6 +61,9 @@ public class RegistrationController {
 
         Event event = eventDAO.findById(registration.eventId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found: " + registration.eventId()));
+        if (event.status() != EventStatus.UPCOMING) {
+            throw new IllegalArgumentException("Registration can only be cancelled before the event starts");
+        }
         boolean cancelled = registrationDAO.cancelRegistration(registrationId);
         if (cancelled) {
             notificationController.createCancellationNotice(student.id(), event.id(), event.title());

@@ -45,4 +45,8 @@ public record RegistrationDetail(
     public boolean canGenerateCertificate() {
         return isActive() && eventStatus == EventStatus.COMPLETED;
     }
+
+    public boolean canCancel() {
+        return isActive() && eventStatus == EventStatus.UPCOMING;
+    }
 }

@@ -173,6 +173,7 @@ class ViewInteractionTest extends JavaFxTestSupport {
         Parent registrations = onFxThread(() ->
                 new MyRegistrationsView(registrationController, certificateController).build());
         awaitFx(() -> hasButton(registrations, "Generate Certificate"));
+        assertThat(onFxThread(() -> button(registrations, "Cancel").isDisabled())).isTrue();
         onFxThread(() -> {
             button(registrations, "Generate Certificate").fire();
             return null;
@@ -188,6 +189,24 @@ class ViewInteractionTest extends JavaFxTestSupport {
         });
         assertThat(onFxThread(() -> labels(certificates)))
                 .anyMatch(text -> text.contains("does not exist"));
+    }
+
+    @Test
+    void eventDetail_shouldShowNonCancellableConfirmationAfterEventStarts() throws Exception {
+        Event ongoing = event("Architecture Workshop", EventCategory.WORKSHOP, EventStatus.ONGOING);
+        when(registrationController.isAlreadyRegistered(ongoing.id())).thenReturn(true);
+        when(eventController.findOrganizerForEvent(ongoing)).thenReturn(user(1, Role.ADMIN));
+
+        Parent detail = onFxThread(() -> new EventDetailView(
+                ongoing,
+                eventController,
+                user(),
+                registrationController,
+                navigationManager
+        ).build());
+
+        awaitFx(() -> hasButton(detail, "Registration Confirmed"));
+        assertThat(onFxThread(() -> button(detail, "Registration Confirmed").isDisabled())).isTrue();
     }
 
     @Test
@@ -352,14 +371,18 @@ class ViewInteractionTest extends JavaFxTestSupport {
     }
 
     private static User user() {
+        return user(7, Role.STUDENT);
+    }
+
+    private static User user(long id, Role role) {
         return new User(
-                7,
-                "student",
-                "student@college.edu",
+                id,
+                role == Role.ADMIN ? "admin" : "student",
+                role == Role.ADMIN ? "admin@college.edu" : "student@college.edu",
                 "hash",
-                Role.STUDENT,
-                "Student User",
-                "Computer Science",
+                role,
+                role == Role.ADMIN ? "Portal Administrator" : "Student User",
+                role == Role.ADMIN ? "Administration" : "Computer Science",
                 OffsetDateTime.now()
         );
     }

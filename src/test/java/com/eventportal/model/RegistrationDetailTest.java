@@ -38,6 +38,14 @@ class RegistrationDetailTest {
         assertThat(registrationDetail(RegistrationStatus.CANCELLED, EventStatus.COMPLETED).canGenerateCertificate()).isFalse();
     }
 
+    @Test
+    void canCancel_shouldRequireConfirmedRegistrationAndUpcomingEvent() {
+        assertThat(registrationDetail(RegistrationStatus.CONFIRMED, EventStatus.UPCOMING).canCancel()).isTrue();
+        assertThat(registrationDetail(RegistrationStatus.CONFIRMED, EventStatus.ONGOING).canCancel()).isFalse();
+        assertThat(registrationDetail(RegistrationStatus.CONFIRMED, EventStatus.COMPLETED).canCancel()).isFalse();
+        assertThat(registrationDetail(RegistrationStatus.CANCELLED, EventStatus.UPCOMING).canCancel()).isFalse();
+    }
+
     private static RegistrationDetail registrationDetail(RegistrationStatus status) {
         return registrationDetail(status, EventStatus.COMPLETED);
     }

@@ -64,9 +64,11 @@ pgAdmin is available at `http://localhost:5050`.
 
 Default development credentials:
 
-| Service | Username | Password |
+| Account | Username | Password |
 |---------|----------|----------|
 | Portal administrator | `admin` | `admin123` |
+| Sample student | `student1` | `admin123` |
+| Sample student | `student2` | `admin123` |
 | pgAdmin | `admin@admin.com` | `admin` |
 
 These are local seed credentials. Change all defaults before using the project
@@ -144,7 +146,9 @@ Run `scripts/design-check.sh` to validate their required sections.
 
 ## Database
 
-Schema and seed scripts live in `sql/`.
+Schema and seed scripts live in `sql/`. The repeatable sample dataset includes
+five events, two students, two confirmed registrations, and matching
+notifications.
 
 | Table | Purpose | Important relationships |
 |-------|---------|-------------------------|

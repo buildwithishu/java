@@ -52,6 +52,7 @@ public class RegistrationDAO {
                 SELECT id, user_id, event_id, registration_date, unique_reg_id, status
                 FROM registrations
                 WHERE id = ?
+                FOR UPDATE
                 """;
         String cancelSql = """
                 UPDATE registrations
@@ -64,6 +65,10 @@ public class RegistrationDAO {
             try {
                 Optional<Registration> registration = findById(connection, lookupSql, registrationId);
                 if (registration.isEmpty() || !registration.get().isActive()) {
+                    connection.rollback();
+                    return false;
+                }
+                if (!isUpcomingEvent(connection, registration.get().eventId())) {
                     connection.rollback();
                     return false;
                 }
@@ -290,6 +295,21 @@ public class RegistrationDAO {
                 WHERE id = ? AND registered_count > 0
                 """;
         updateEventCount(connection, sql, eventId, "Unable to decrement registration count");
+    }
+
+    private static boolean isUpcomingEvent(Connection connection, long eventId) throws SQLException {
+        String sql = """
+                SELECT status
+                FROM events
+                WHERE id = ?
+                FOR UPDATE
+                """;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, eventId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() && EventStatus.UPCOMING.name().equals(resultSet.getString("status"));
+            }
+        }
     }
 
     private static void updateEventCount(Connection connection, String sql, long eventId, String failureMessage) throws SQLException {

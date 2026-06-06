@@ -6,6 +6,7 @@ import com.eventportal.model.EventCategory;
 import com.eventportal.model.EventStatus;
 import com.eventportal.model.Notification;
 import com.eventportal.model.Registration;
+import com.eventportal.model.RegistrationStatus;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
 import com.eventportal.util.PasswordHasher;
@@ -87,6 +88,40 @@ class CoreDaoIntegrationTest {
         assertThat(eventDAO.findById(event.id())).get()
                 .extracting(Event::registeredCount)
                 .isEqualTo(0);
+    }
+
+    @Test
+    void cancelRegistration_shouldRejectEventThatHasStartedWithoutChangingCounts() throws SQLException {
+        User admin = userDAO.createUser(user("admin", "admin@college.edu", Role.ADMIN));
+        User student = userDAO.createUser(user("student", "student@college.edu", Role.STUDENT));
+        Event event = eventDAO.createEvent(event(admin.id()));
+        Registration registration = registrationDAO.register(student.id(), event.id());
+        Event ongoing = new Event(
+                event.id(),
+                event.title(),
+                event.description(),
+                event.category(),
+                event.venue(),
+                event.eventDate(),
+                event.startTime(),
+                event.endTime(),
+                event.capacity(),
+                1,
+                EventStatus.ONGOING,
+                event.createdBy(),
+                event.createdAt(),
+                event.updatedAt()
+        );
+        eventDAO.updateEvent(ongoing);
+
+        assertThat(registrationDAO.cancelRegistration(registration.id())).isFalse();
+        assertThat(registrationDAO.findById(registration.id())).get()
+                .extracting(Registration::status)
+                .isEqualTo(RegistrationStatus.CONFIRMED);
+        assertThat(registrationDAO.countByEvent(event.id())).isEqualTo(1);
+        assertThat(eventDAO.findById(event.id())).get()
+                .extracting(Event::registeredCount)
+                .isEqualTo(1);
     }
 
     @Test

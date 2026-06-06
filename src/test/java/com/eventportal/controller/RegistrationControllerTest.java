@@ -128,6 +128,22 @@ class RegistrationControllerTest {
     }
 
     @Test
+    void cancelRegistration_shouldRejectEventThatHasStarted() throws SQLException {
+        User student = user(7, Role.STUDENT);
+        Event event = event(12, EventStatus.ONGOING, 3, 40);
+        Registration registration = registration(21, student.id(), event.id(), RegistrationStatus.CONFIRMED);
+        sessionManager.login(student);
+        when(registrationDAO.findByUser(student.id())).thenReturn(List.of(registration));
+        when(eventDAO.findById(event.id())).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> registrationController.cancelRegistration(registration.id()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Registration can only be cancelled before the event starts");
+        verify(registrationDAO, never()).cancelRegistration(registration.id());
+        verifyNoInteractions(notificationController);
+    }
+
+    @Test
     void cancelRegistration_shouldRejectRegistrationOwnedByAnotherStudent() throws SQLException {
         User student = user(7, Role.STUDENT);
         Registration anotherStudentsRegistration =

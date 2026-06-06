@@ -72,7 +72,7 @@ public class MyRegistrationsView {
         message.getStyleClass().add("error-text");
 
         Button cancelButton = new Button("Cancel");
-        cancelButton.setDisable(!registration.isActive());
+        cancelButton.setDisable(!registration.canCancel());
         cancelButton.setOnAction(event -> cancelRegistration(
                 registration.registrationId(),
                 cancelButton,

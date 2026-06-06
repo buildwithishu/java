@@ -26,6 +26,15 @@ import javafx.stage.Stage;
 
 public class App extends Application {
     public static final String APP_NAME = "College Event Management Portal";
+    private final DatabaseConnection databaseConnection;
+
+    public App() {
+        this(DatabaseConnection.getInstance());
+    }
+
+    App(DatabaseConnection databaseConnection) {
+        this.databaseConnection = databaseConnection;
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -37,7 +46,6 @@ public class App extends Application {
 
         NavigationManager navigationManager = new NavigationManager(primaryStage);
         SessionManager sessionManager = SessionManager.getInstance();
-        DatabaseConnection databaseConnection = DatabaseConnection.getInstance();
         UserDAO userDAO = new UserDAO(databaseConnection);
         EventDAO eventDAO = new EventDAO(databaseConnection);
         RegistrationDAO registrationDAO = new RegistrationDAO(databaseConnection);
@@ -122,6 +130,11 @@ public class App extends Application {
                 loginRoot
             ).build());
         }
+    }
+
+    @Override
+    public void stop() {
+        databaseConnection.close();
     }
 
     public static void main(String[] args) {
