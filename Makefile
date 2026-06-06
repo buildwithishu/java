@@ -1,4 +1,4 @@
-.PHONY: help dev-up dev-down dev-restart db-reset app-run app-build app-jar clean test docker-build logs pgadmin
+.PHONY: help dev-up dev-down dev-restart db-reset app-run app-build app-jar clean test verify docker-build logs pgadmin
 
 help: ## Show available commands
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -30,7 +30,18 @@ clean: ## Clean build artifacts
 	./mvnw clean
 
 test: ## Run unit tests
-	./mvnw test
+	@if [ -z "$$DISPLAY" ] && command -v xvfb-run >/dev/null 2>&1; then \
+		xvfb-run -a ./mvnw test; \
+	else \
+		./mvnw test; \
+	fi
+
+verify: ## Run tests, coverage gate, and packaging
+	@if [ -z "$$DISPLAY" ] && command -v xvfb-run >/dev/null 2>&1; then \
+		xvfb-run -a ./mvnw verify -P headless; \
+	else \
+		./mvnw verify -P headless; \
+	fi
 
 docker-build: ## Build the Docker image
 	docker build -t college-event-portal:local .

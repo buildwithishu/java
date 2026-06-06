@@ -25,11 +25,12 @@ This file tracks implementation progress against `implementation_plan.md`.
 
 ## Verification Snapshot
 
-- `./mvnw clean verify -P headless`: 73 tests passed, 0 failed, 0 skipped.
+- `./mvnw clean verify -P headless`: 87 tests passed, 0 failed, 0 skipped.
 - Live PostgreSQL integration tests pass against PostgreSQL 15.
-- JaCoCo line coverage: 40.0% (908/2268); the project target remains 80%.
+- JaCoCo line coverage: 80.3% (1822/2268); Maven enforces a minimum 80% bundle line-coverage gate.
 - `scripts/design-check.sh`: passes.
-- Remaining environment checks: Docker image/Compose execution, manual JavaFX workflows, remote CI/release workflows.
+- JavaFX screen construction, core interactions, and application bootstrap pass against a real display toolkit; broader exploratory UI review remains.
+- Remaining environment checks: Docker image/Compose execution and remote CI/release workflows.
 
 ## Implementation Log
 
@@ -144,3 +145,8 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Removed AtlantaFX's redundant JavaFX 20 transitive metadata; the build now resolves the project's explicit JavaFX 21 dependencies without model warnings.
 - 2026-06-06: Reconciled implementation status with verified evidence and recorded the remaining coverage and environment-validation work.
 - 2026-06-06: Added JavaFX-thread smoke coverage for every planned view and configured CI to run UI tests under Xvfb.
+- 2026-06-06: Added JavaFX interaction coverage for authentication, filtering, form validation, certificates, registrations, notifications, and navigation.
+- 2026-06-06: Added invariant coverage for user, notification, certificate, registration, event, and dashboard domain records.
+- 2026-06-06: Added JavaFX application-bootstrap coverage for theme setup, dependency wiring, stage configuration, and the initial login screen.
+- 2026-06-06: Reached 80.3% line coverage and added an enforced 80% JaCoCo bundle gate to Maven verify.
+- 2026-06-06: Made JavaFX verification display-aware in Make and explicitly installed Xvfb in CI; both Compose configurations validate locally.

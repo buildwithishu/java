@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 abstract class JavaFxTestSupport {
     @BeforeAll
@@ -30,5 +31,16 @@ abstract class JavaFxTestSupport {
         FutureTask<T> task = new FutureTask<>(action);
         Platform.runLater(task);
         return task.get(10, TimeUnit.SECONDS);
+    }
+
+    static void awaitFx(BooleanSupplier condition) throws Exception {
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+        while (System.nanoTime() < deadline) {
+            if (onFxThread(condition::getAsBoolean)) {
+                return;
+            }
+            Thread.sleep(25);
+        }
+        throw new AssertionError("JavaFX condition was not satisfied");
     }
 }

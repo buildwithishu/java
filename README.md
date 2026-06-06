@@ -61,11 +61,14 @@ make dev-down
 make db-reset
 make app-run
 make test
+make verify
 make app-build
 ```
 
-Run `./mvnw verify` to package the app and generate a JaCoCo coverage report at
-`target/site/jacoco/index.html`.
+`make verify` packages the app, runs the enforced 80% JaCoCo line-coverage gate,
+and writes the report to `target/site/jacoco/index.html`. On headless Linux,
+install `xvfb`; the Make target uses `xvfb-run` automatically when `DISPLAY` is
+not set.
 
 ## Project Structure
 

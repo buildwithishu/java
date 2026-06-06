@@ -27,3 +27,5 @@ docs: document local setup
 - Do not hardcode secrets.
 - Keep JavaFX views separate from DAO/database logic.
 - Add or update tests for business rules and utilities.
+- Run `make verify` before opening a pull request; the build enforces 80% line coverage.
+- Install `xvfb` on headless Linux so JavaFX screen and interaction tests can run.
