@@ -1,4 +1,4 @@
-.PHONY: help dev-up dev-down dev-restart db-reset app-run app-build app-jar clean test verify docker-build logs pgadmin
+.PHONY: help dev-up dev-down dev-restart db-reset app-run app-build app-jar clean test verify screenshots docker-build logs pgadmin
 
 help: ## Show available commands
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z0-9_-]+:.*##/ {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -42,6 +42,9 @@ verify: ## Run tests, coverage gate, and packaging
 	else \
 		./mvnw verify -P headless; \
 	fi
+
+screenshots: ## Regenerate README screenshots from JavaFX views
+	./mvnw -Dtest=DocumentationScreenshotTest -DgenerateDocsScreenshots=true test
 
 docker-build: ## Build the Docker image
 	docker build -t college-event-portal:local .

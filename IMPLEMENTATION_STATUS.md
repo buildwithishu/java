@@ -21,13 +21,13 @@ This file tracks implementation progress against `implementation_plan.md`.
 | JavaFX views | Implemented | Planned student/admin workflows are present and database/BCrypt/PDF work runs off the JavaFX application thread; manual UI verification remains |
 | Utilities | Implemented | Validation, date/time, session, navigation, password, async task, file, PDF generation, and PDF preview helpers added |
 | CI/CD | Configured | CI, release, and Docker build workflows added; remote GitHub execution remains outstanding |
-| Documentation | Implemented | README, contributing guide, MIT license, PR template, and implementation tracker added; product screenshots remain outstanding |
+| Documentation | Verified | README, reproducible product screenshots, architecture/schema guidance, contributing guide, MIT license, PR template, and implementation tracker added |
 
 ## Verification Snapshot
 
-- `./mvnw clean verify -P headless`: 95 tests passed, 0 failed, 0 skipped.
+- `./mvnw clean verify -P headless`: 96 tests passed, 0 failed, 0 skipped.
 - Live PostgreSQL integration tests pass against PostgreSQL 15.
-- JaCoCo line coverage: 80.3% (1822/2268); Maven enforces a minimum 80% bundle line-coverage gate.
+- JaCoCo line coverage: 80.5% (1863/2313); Maven enforces a minimum 80% bundle line-coverage gate.
 - `scripts/design-check.sh`: passes.
 - JavaFX screen construction, core interactions, and application bootstrap pass against a real display toolkit; broader exploratory UI review remains.
 - Remaining environment checks: Docker image/Compose execution and remote CI/release workflows.
@@ -153,3 +153,5 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Hardened boundary lengths, BCrypt input size, certificate path confinement, non-root container execution, and GHCR release image naming.
 - 2026-06-06: Replaced per-operation DriverManager connections with a bounded, lazy HikariCP pool while preserving DAO try-with-resources behavior.
 - 2026-06-06: Excluded module descriptors from the shaded classpath JAR to avoid duplicate multi-release module metadata.
+- 2026-06-06: Replaced README placeholders with generated JavaFX screenshots and complete feature, setup, architecture, schema, verification, CI/CD, and security documentation.
+- 2026-06-06: Added a reproducible `make screenshots` workflow for JavaFX documentation images.
