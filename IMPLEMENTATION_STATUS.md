@@ -118,3 +118,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added event lifecycle state-machine tests covering valid progression and invalid terminal-state transitions.
 - 2026-06-06: Added authentication controller tests for login, validation, duplicate prevention, normalization, and BCrypt hashing.
 - 2026-06-06: Added registration controller tests for capacity/status availability, duplicates, ownership, notifications, and role authorization.
+- 2026-06-06: Added dashboard aggregation and real PDF certificate workflow tests with temporary output isolation.
