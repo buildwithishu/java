@@ -134,6 +134,9 @@ public class EventController {
         if (event.registeredCount() > 0) {
             throw new IllegalArgumentException("Events with registrations cannot be deleted");
         }
+        if (registrationDAO != null && !registrationDAO.findByEvent(eventId).isEmpty()) {
+            throw new IllegalArgumentException("Events with registration history cannot be deleted");
+        }
         return eventDAO.deleteEvent(eventId);
     }
 

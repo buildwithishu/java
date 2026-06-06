@@ -55,7 +55,15 @@ public class EventDAO {
     }
 
     public boolean deleteEvent(long id) throws SQLException {
-        String sql = "DELETE FROM events WHERE id = ?";
+        String sql = """
+                DELETE FROM events event
+                WHERE event.id = ?
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM registrations registration
+                      WHERE registration.event_id = event.id
+                  )
+                """;
 
         try (Connection connection = databaseConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

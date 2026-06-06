@@ -25,9 +25,9 @@ This file tracks implementation progress against `implementation_plan.md`.
 
 ## Verification Snapshot
 
-- `./mvnw clean verify -P headless`: 104 tests passed, 0 failed, 0 skipped.
+- `./mvnw clean verify -P headless`: 106 tests passed, 0 failed, 0 skipped.
 - Live PostgreSQL integration tests pass against PostgreSQL 15.
-- JaCoCo line coverage: 81.4% (1926/2367); Maven enforces a minimum 80% bundle line-coverage gate.
+- JaCoCo line coverage: 81.4% (1928/2369); Maven enforces a minimum 80% bundle line-coverage gate.
 - `scripts/design-check.sh`: passes.
 - JavaFX screen construction, core interactions, and application bootstrap pass against a real display toolkit; broader exploratory UI review remains.
 - Remaining environment checks: Docker image/Compose execution and remote CI/release workflows.
@@ -160,3 +160,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added application shutdown cleanup for the HikariCP pool.
 - 2026-06-06: Made the student dashboard open on the student's own upcoming registrations with a dedicated dashboard return action.
 - 2026-06-06: Added the planned admin Create Event quick action and JavaFX interaction coverage for both dashboard workflows.
+- 2026-06-06: Protected cancelled registration history from event deletion in the controller, DAO query, and PostgreSQL foreign key.

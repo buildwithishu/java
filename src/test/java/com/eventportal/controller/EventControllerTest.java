@@ -248,6 +248,26 @@ class EventControllerTest {
     }
 
     @Test
+    void deleteEvent_shouldRejectCancelledRegistrationHistory() throws SQLException {
+        Event upcoming = event(EventStatus.UPCOMING, 0);
+        Registration cancelled = new Registration(
+                25,
+                7,
+                upcoming.id(),
+                OffsetDateTime.now(),
+                "REG-12-7-CANCELLED",
+                RegistrationStatus.CANCELLED
+        );
+        when(eventDAO.findById(upcoming.id())).thenReturn(Optional.of(upcoming));
+        when(registrationDAO.findByEvent(upcoming.id())).thenReturn(List.of(cancelled));
+
+        assertThatThrownBy(() -> eventController.deleteEvent(upcoming.id()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Events with registration history cannot be deleted");
+        verify(eventDAO, never()).deleteEvent(upcoming.id());
+    }
+
+    @Test
     void eventQueries_shouldDelegateAndNormalizeSearch() throws SQLException {
         Event upcoming = event(EventStatus.UPCOMING);
         when(eventDAO.findAll()).thenReturn(List.of(upcoming));

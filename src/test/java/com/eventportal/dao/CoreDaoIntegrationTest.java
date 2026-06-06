@@ -125,6 +125,22 @@ class CoreDaoIntegrationTest {
     }
 
     @Test
+    void deleteEvent_shouldPreserveCancelledRegistrationHistory() throws SQLException {
+        User admin = userDAO.createUser(user("admin", "admin@college.edu", Role.ADMIN));
+        User student = userDAO.createUser(user("student", "student@college.edu", Role.STUDENT));
+        Event event = eventDAO.createEvent(event(admin.id()));
+        Registration registration = registrationDAO.register(student.id(), event.id());
+        assertThat(registrationDAO.cancelRegistration(registration.id())).isTrue();
+        assertThat(eventDAO.findById(event.id())).get()
+                .extracting(Event::registeredCount)
+                .isEqualTo(0);
+
+        assertThat(eventDAO.deleteEvent(event.id())).isFalse();
+        assertThat(eventDAO.findById(event.id())).isPresent();
+        assertThat(registrationDAO.findById(registration.id())).isPresent();
+    }
+
+    @Test
     void usersAndEvents_shouldSupportCrudSearchAndFilters() throws SQLException {
         User admin = userDAO.createUser(user("admin", "admin@college.edu", Role.ADMIN));
         User student = userDAO.createUser(user("student", "student@college.edu", Role.STUDENT));

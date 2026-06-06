@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE TABLE IF NOT EXISTS registrations (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    event_id BIGINT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    event_id BIGINT NOT NULL REFERENCES events(id) ON DELETE RESTRICT,
     registration_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     unique_reg_id VARCHAR(40) NOT NULL UNIQUE,
     status VARCHAR(30) NOT NULL DEFAULT 'CONFIRMED' CHECK (status IN ('CONFIRMED', 'CANCELLED'))
@@ -67,6 +67,33 @@ CREATE INDEX IF NOT EXISTS idx_notifications_created_at ON notifications(created
 CREATE UNIQUE INDEX IF NOT EXISTS idx_notifications_event_reminder_unique
     ON notifications(user_id, event_id, title)
     WHERE title = 'Event Reminder';
+
+DO $$
+DECLARE
+    event_fk_name TEXT;
+BEGIN
+    SELECT constraint_name
+    INTO event_fk_name
+    FROM information_schema.referential_constraints
+    WHERE constraint_schema = current_schema()
+      AND constraint_name IN (
+          SELECT constraint_name
+          FROM information_schema.key_column_usage
+          WHERE table_schema = current_schema()
+            AND table_name = 'registrations'
+            AND column_name = 'event_id'
+      )
+    LIMIT 1;
+
+    IF event_fk_name IS NOT NULL THEN
+        EXECUTE format('ALTER TABLE registrations DROP CONSTRAINT %I', event_fk_name);
+    END IF;
+
+    ALTER TABLE registrations
+        ADD CONSTRAINT registrations_event_id_fkey
+        FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE RESTRICT;
+END
+$$;
 
 INSERT INTO users (username, email, password_hash, role, full_name, department)
 VALUES (
