@@ -13,12 +13,10 @@ import com.eventportal.dao.EventDAO;
 import com.eventportal.dao.NotificationDAO;
 import com.eventportal.dao.RegistrationDAO;
 import com.eventportal.dao.UserDAO;
-import com.eventportal.model.Role;
 import com.eventportal.model.User;
 import com.eventportal.util.AppConfig;
 import com.eventportal.util.NavigationManager;
 import com.eventportal.util.SessionManager;
-import com.eventportal.view.DashboardPlaceholderView;
 import com.eventportal.view.LoginView;
 import com.eventportal.view.AdminDashboardView;
 import com.eventportal.view.StudentDashboardView;
@@ -103,32 +101,27 @@ public class App extends Application {
             User user,
             Parent loginRoot
     ) {
-        if (user.role() == Role.STUDENT) {
-            navigationManager.replace(new StudentDashboardView(
-                    user,
-                    eventController,
-                    registrationController,
-                    certificateController,
-                    notificationController,
-                    navigationManager,
-                    sessionManager,
-                    loginRoot
+        switch (user.role()) {
+            case STUDENT -> navigationManager.replace(new StudentDashboardView(
+                user,
+                eventController,
+                registrationController,
+                certificateController,
+                notificationController,
+                navigationManager,
+                sessionManager,
+                loginRoot
             ).build());
-            return;
-        }
-        if (user.role() == Role.ADMIN) {
-            navigationManager.replace(new AdminDashboardView(
-                    user,
-                    dashboardController,
-                    eventController,
-                    registrationController,
-                    navigationManager,
-                    sessionManager,
-                    loginRoot
+            case ADMIN -> navigationManager.replace(new AdminDashboardView(
+                user,
+                dashboardController,
+                eventController,
+                registrationController,
+                navigationManager,
+                sessionManager,
+                loginRoot
             ).build());
-            return;
         }
-        navigationManager.replace(new DashboardPlaceholderView(user, navigationManager, sessionManager, loginRoot).build());
     }
 
     public static void main(String[] args) {

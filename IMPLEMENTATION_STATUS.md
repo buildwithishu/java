@@ -18,7 +18,7 @@ This file tracks implementation progress against `implementation_plan.md`.
 | Models | In progress | Immutable records and enums added |
 | DAO layer | In progress | User, event, registration, certificate, and notification DAOs added |
 | Controller/service layer | In progress | Auth, event, registration, notification, certificate, and dashboard controller foundations added |
-| JavaFX views | In progress | Login/register, student dashboard with quick stats, admin dashboard, searchable event list/detail, registrations, certificates, notifications, profile, admin event management, reports, and dashboard placeholder added |
+| JavaFX views | In progress | Login/register, student dashboard with quick stats, admin dashboard, searchable event list/detail, registrations, certificates, notifications, profile, admin event management, and reports added |
 | Utilities | In progress | Validation, date/time, session, navigation, password, and PDF certificate helpers added |
 | CI/CD | In progress | CI, release, and Docker build workflows added |
 | Documentation | In progress | README, contributing guide, MIT license, and PR template added |
@@ -130,3 +130,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Moved event registration, organizer, registration-status, cancellation, and attendee lookups off the JavaFX application thread.
 - 2026-06-06: Moved admin event loading, create/edit, lifecycle, reminder, cancellation, and deletion operations off the JavaFX application thread.
 - 2026-06-06: Moved login and student account creation, including BCrypt work, off the JavaFX application thread.
+- 2026-06-06: Removed the obsolete dashboard placeholder and made role-based dashboard routing exhaustive.

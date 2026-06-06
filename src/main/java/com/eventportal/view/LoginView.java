@@ -1,7 +1,6 @@
 package com.eventportal.view;
 
 import com.eventportal.controller.AuthController;
-import com.eventportal.model.Role;
 import com.eventportal.model.User;
 import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
@@ -117,9 +116,5 @@ public class LoginView {
             return failure.getMessage();
         }
         return fallback;
-    }
-
-    public static String dashboardLabelFor(User user) {
-        return user.role() == Role.ADMIN ? "Admin dashboard" : "Student dashboard";
     }
 }
