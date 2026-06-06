@@ -57,11 +57,8 @@ jobs:
       - name: Compile
         run: mvn -B clean compile
 
-      - name: Test
-        run: mvn -B test -P headless
-
-      - name: Package
-        run: mvn -B package -DskipTests
+      - name: Test, package, and report coverage
+        run: mvn -B verify -P headless
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
@@ -75,3 +72,10 @@ jobs:
         with:
           name: test-reports
           path: target/surefire-reports/
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/site/jacoco/

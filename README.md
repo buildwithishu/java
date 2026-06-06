@@ -64,6 +64,9 @@ make test
 make app-build
 ```
 
+Run `./mvnw verify` to package the app and generate a JaCoCo coverage report at
+`target/site/jacoco/index.html`.
+
 ## Project Structure
 
 ```text
@@ -87,4 +90,4 @@ Progress against the original implementation plan is tracked in `IMPLEMENTATION_
 
 ## CI
 
-`.github/workflows/ci.yml` runs compile, tests, package, and artifact upload on GitHub with a PostgreSQL service container.
+`.github/workflows/ci.yml` runs compile, tests, package, coverage reporting, and artifact upload on GitHub with a PostgreSQL service container.

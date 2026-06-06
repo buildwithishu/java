@@ -119,3 +119,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added authentication controller tests for login, validation, duplicate prevention, normalization, and BCrypt hashing.
 - 2026-06-06: Added registration controller tests for capacity/status availability, duplicates, ownership, notifications, and role authorization.
 - 2026-06-06: Added dashboard aggregation and real PDF certificate workflow tests with temporary output isolation.
+- 2026-06-06: Integrated JaCoCo coverage reports into Maven verify/CI and configured Mockito as an explicit Java agent.
