@@ -6,6 +6,7 @@ import com.eventportal.controller.NotificationController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.RegistrationDetail;
 import com.eventportal.model.User;
+import com.eventportal.util.DateTimeUtil;
 import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
 import com.eventportal.util.SessionManager;
@@ -58,7 +59,7 @@ public class StudentDashboardView {
 
         root.setTop(header());
         root.setLeft(sidebar());
-        showUpcomingEvents();
+        showDashboardHome();
         return root;
     }
 
@@ -110,6 +111,10 @@ public class StudentDashboardView {
     }
 
     private Parent sidebar() {
+        Button dashboardButton = new Button("Dashboard");
+        dashboardButton.setMaxWidth(Double.MAX_VALUE);
+        dashboardButton.setOnAction(event -> showDashboardHome());
+
         Button browseButton = new Button("Browse Events");
         browseButton.setMaxWidth(Double.MAX_VALUE);
         browseButton.setOnAction(event -> showUpcomingEvents());
@@ -140,11 +145,71 @@ public class StudentDashboardView {
             navigationManager.replace(loginRoot);
         });
 
-        VBox sidebar = new VBox(12, browseButton, registrationsButton, certificatesButton, notificationsButton, profileButton, logoutButton);
+        VBox sidebar = new VBox(
+                12,
+                dashboardButton,
+                browseButton,
+                registrationsButton,
+                certificatesButton,
+                notificationsButton,
+                profileButton,
+                logoutButton
+        );
         sidebar.getStyleClass().add("sidebar");
         sidebar.setPadding(new Insets(0, 18, 0, 0));
         sidebar.setPrefWidth(180);
         return sidebar;
+    }
+
+    private void showDashboardHome() {
+        VBox registrationList = new VBox(label("Loading your upcoming events...", "muted-text"));
+        registrationList.setSpacing(12);
+        setContent("My Upcoming Events", registrationList);
+        FxTaskRunner.run(
+                "student-upcoming-registration-loader",
+                registrationController::findMyRegistrationDetails,
+                registrations -> renderUpcomingRegistrations(registrationList, registrations),
+                failure -> registrationList.getChildren().setAll(label(
+                        "Unable to load your registrations. Start PostgreSQL and try again.",
+                        "error-text"
+                ))
+        );
+    }
+
+    private static void renderUpcomingRegistrations(
+            VBox registrationList,
+            List<RegistrationDetail> registrations
+    ) {
+        List<RegistrationDetail> upcoming = registrations.stream()
+                .filter(RegistrationDetail::canCancel)
+                .toList();
+        registrationList.getChildren().clear();
+        if (upcoming.isEmpty()) {
+            registrationList.getChildren().add(label(
+                    "You do not have any upcoming registered events.",
+                    "muted-text"
+            ));
+            return;
+        }
+        for (RegistrationDetail registration : upcoming) {
+            registrationList.getChildren().add(upcomingRegistrationCard(registration));
+        }
+    }
+
+    private static Parent upcomingRegistrationCard(RegistrationDetail registration) {
+        Label title = label(registration.eventTitle(), "card-title");
+        Label details = label(
+                DateTimeUtil.formatDate(registration.eventDate())
+                        + " • "
+                        + registration.venue()
+                        + " • "
+                        + registration.uniqueRegId(),
+                "muted-text"
+        );
+        VBox card = new VBox(6, title, details);
+        card.getStyleClass().add("event-card");
+        card.setPadding(new Insets(14));
+        return card;
     }
 
     private void showUpcomingEvents() {

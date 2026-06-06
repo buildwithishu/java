@@ -68,7 +68,6 @@ class ViewBuildTest extends JavaFxTestSupport {
     void studentViews_shouldBuild() throws Exception {
         User student = user(7, Role.STUDENT);
         Event upcoming = event(EventStatus.UPCOMING);
-        when(eventController.findUpcomingEvents()).thenReturn(List.of(upcoming));
         lenient().when(eventController.findOrganizerForEvent(upcoming)).thenReturn(user(1, Role.ADMIN));
         when(registrationController.findMyRegistrationDetails()).thenReturn(List.of());
         when(certificateController.findMyCertificates()).thenReturn(List.of());

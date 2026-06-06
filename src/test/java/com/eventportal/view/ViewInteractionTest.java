@@ -3,10 +3,12 @@ package com.eventportal.view;
 import com.eventportal.App;
 import com.eventportal.controller.AuthController;
 import com.eventportal.controller.CertificateController;
+import com.eventportal.controller.DashboardController;
 import com.eventportal.controller.EventController;
 import com.eventportal.controller.NotificationController;
 import com.eventportal.controller.RegistrationController;
 import com.eventportal.model.Certificate;
+import com.eventportal.model.DashboardSummary;
 import com.eventportal.model.Event;
 import com.eventportal.model.EventCategory;
 import com.eventportal.model.EventStatus;
@@ -59,12 +61,18 @@ class ViewInteractionTest extends JavaFxTestSupport {
     private CertificateController certificateController;
     @Mock
     private NotificationController notificationController;
+    @Mock
+    private DashboardController dashboardController;
 
     private NavigationManager navigationManager;
+    private Stage stage;
 
     @BeforeEach
     void setUp() throws Exception {
-        navigationManager = onFxThread(() -> new NavigationManager(new Stage()));
+        navigationManager = onFxThread(() -> {
+            stage = new Stage();
+            return new NavigationManager(stage);
+        });
     }
 
     @Test
@@ -207,6 +215,76 @@ class ViewInteractionTest extends JavaFxTestSupport {
 
         awaitFx(() -> hasButton(detail, "Registration Confirmed"));
         assertThat(onFxThread(() -> button(detail, "Registration Confirmed").isDisabled())).isTrue();
+    }
+
+    @Test
+    void studentDashboard_shouldOpenWithOwnUpcomingEventsAndBrowseAllEvents() throws Exception {
+        User student = user();
+        Event browsableEvent = event("Cultural Night", EventCategory.CULTURAL, EventStatus.UPCOMING);
+        RegistrationDetail ownRegistration = new RegistrationDetail(
+                21,
+                11,
+                "REG-21",
+                RegistrationStatus.CONFIRMED,
+                OffsetDateTime.now(),
+                "Architecture Workshop",
+                EventStatus.UPCOMING,
+                LocalDate.now().plusDays(5),
+                "Seminar Hall"
+        );
+        when(registrationController.findMyRegistrationDetails()).thenReturn(List.of(ownRegistration));
+        when(certificateController.findMyCertificates()).thenReturn(List.of());
+        when(notificationController.countUnread(student.id())).thenReturn(0);
+        when(eventController.findUpcomingEvents()).thenReturn(List.of(browsableEvent));
+
+        Parent dashboard = onFxThread(() -> new StudentDashboardView(
+                student,
+                eventController,
+                registrationController,
+                certificateController,
+                notificationController,
+                navigationManager,
+                com.eventportal.util.SessionManager.getInstance(),
+                new StackPane()
+        ).build());
+
+        awaitFx(() -> hasLabel(dashboard, "My Upcoming Events"));
+        assertThat(onFxThread(() -> labels(dashboard)))
+                .contains("Architecture Workshop")
+                .doesNotContain("Cultural Night");
+
+        onFxThread(() -> {
+            button(dashboard, "Browse Events").fire();
+            return null;
+        });
+        awaitFx(() -> hasLabel(dashboard, "Cultural Night"));
+    }
+
+    @Test
+    void adminDashboard_shouldOfferDirectCreateEventAction() throws Exception {
+        User admin = user(1, Role.ADMIN);
+        when(dashboardController.loadAdminSummary())
+                .thenReturn(new DashboardSummary(0, 0, 0, List.of(), List.of(), List.of()));
+        when(eventController.findAllEvents()).thenReturn(List.of());
+
+        Parent dashboard = onFxThread(() -> new AdminDashboardView(
+                admin,
+                dashboardController,
+                eventController,
+                registrationController,
+                navigationManager,
+                com.eventportal.util.SessionManager.getInstance(),
+                new StackPane()
+        ).build());
+
+        onFxThread(() -> {
+            navigationManager.replace(dashboard);
+            button(dashboard, "Create Event").fire();
+            return null;
+        });
+
+        awaitFx(() -> stage.getScene() != null && hasLabel(stage.getScene().getRoot(), "Create Event"));
+        assertThat(onFxThread(() -> textField(stage.getScene().getRoot(), "Title"))).isNotNull();
     }
 
     @Test

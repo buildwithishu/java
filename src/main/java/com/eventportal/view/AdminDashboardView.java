@@ -69,26 +69,34 @@ public class AdminDashboardView {
         HBox header = new HBox(16, new VBox(4, title, welcome), logoutButton);
         header.setAlignment(Pos.CENTER_LEFT);
 
+        Button createEventButton = new Button("Create Event");
+        createEventButton.getStyleClass().add("primary-action");
+        createEventButton.setOnAction(event -> openEventManagement());
+
         Button manageEventsButton = new Button("Manage Events");
         manageEventsButton.getStyleClass().add("primary-action");
-        manageEventsButton.setOnAction(event -> navigationManager.show(new AdminEventManagementView(
-                eventController,
-                registrationController,
-                user,
-                navigationManager
-        ).build()));
+        manageEventsButton.setOnAction(event -> openEventManagement());
 
         Button reportsButton = new Button("View Reports");
         reportsButton.setOnAction(event -> navigationManager.show(new AdminReportView(dashboardController, navigationManager).build()));
 
         Parent body = dashboardBody();
 
-        HBox actions = new HBox(12, manageEventsButton, reportsButton);
+        HBox actions = new HBox(12, createEventButton, manageEventsButton, reportsButton);
 
         VBox root = new VBox(20, header, actions, body);
         root.getStyleClass().add("app-root");
         root.setPadding(new Insets(24));
         return root;
+    }
+
+    private void openEventManagement() {
+        navigationManager.show(new AdminEventManagementView(
+                eventController,
+                registrationController,
+                user,
+                navigationManager
+        ).build());
     }
 
     private Parent dashboardBody() {
