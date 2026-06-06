@@ -8,6 +8,7 @@ import com.eventportal.model.EventStatus;
 import com.eventportal.model.User;
 import com.eventportal.util.DateTimeUtil;
 import com.eventportal.util.EventFilterUtil;
+import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,7 +23,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Locale;
 
@@ -161,19 +161,27 @@ public class EventListView {
     }
 
     private void register(Event event, Button registerButton, Label message) {
-        try {
-            registrationController.registerForEvent(event.id());
-            message.getStyleClass().remove("error-text");
-            if (!message.getStyleClass().contains("success-text")) {
-                message.getStyleClass().add("success-text");
-            }
-            message.setText("Registration confirmed.");
-            registerButton.setDisable(true);
-        } catch (SQLException exception) {
-            showError(message, "Registration failed because the database is unavailable.");
-        } catch (IllegalArgumentException | IllegalStateException exception) {
-            showError(message, exception.getMessage());
+        registerButton.setDisable(true);
+        FxTaskRunner.run(
+                "event-registration",
+                () -> registrationController.registerForEvent(event.id()),
+                registration -> showSuccess(message, "Registration confirmed."),
+                failure -> {
+                    registerButton.setDisable(false);
+                    showError(message, operationMessage(
+                            failure,
+                            "Registration failed because the database is unavailable."
+                    ));
+                }
+        );
+    }
+
+    private static void showSuccess(Label message, String text) {
+        message.getStyleClass().remove("error-text");
+        if (!message.getStyleClass().contains("success-text")) {
+            message.getStyleClass().add("success-text");
         }
+        message.setText(text);
     }
 
     private static void showError(Label message, String text) {
@@ -182,5 +190,11 @@ public class EventListView {
             message.getStyleClass().add("error-text");
         }
         message.setText(text);
+    }
+
+    private static String operationMessage(Throwable failure, String fallback) {
+        return failure instanceof IllegalArgumentException || failure instanceof IllegalStateException
+                ? failure.getMessage()
+                : fallback;
     }
 }

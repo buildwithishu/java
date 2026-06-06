@@ -127,3 +127,4 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Expanded live PostgreSQL integration coverage across all core DAOs, CRUD, filters, aggregates, notifications, and certificate upserts.
 - 2026-06-06: Moved student registration, certificate, preview, and notification database work off the JavaFX application thread.
 - 2026-06-06: Moved student/admin dashboard and report aggregation off the JavaFX application thread with loading states.
+- 2026-06-06: Moved event registration, organizer, registration-status, cancellation, and attendee lookups off the JavaFX application thread.
