@@ -1,6 +1,7 @@
 package com.eventportal.view;
 
 import com.eventportal.controller.AuthController;
+import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -13,8 +14,6 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-
-import java.sql.SQLException;
 
 public class RegisterView {
     private final AuthController authController;
@@ -47,17 +46,18 @@ public class RegisterView {
         Button registerButton = new Button("Register");
         registerButton.getStyleClass().add("primary-action");
         registerButton.setDefaultButton(true);
+        Hyperlink backLink = new Hyperlink("Back to login");
+        backLink.setOnAction(event -> navigationManager.goBack());
         registerButton.setOnAction(event -> register(
                 usernameField,
                 emailField,
                 passwordField,
                 fullNameField,
                 departmentBox,
-                messageLabel
+                messageLabel,
+                registerButton,
+                backLink
         ));
-
-        Hyperlink backLink = new Hyperlink("Back to login");
-        backLink.setOnAction(event -> navigationManager.goBack());
 
         HBox actions = new HBox(12, registerButton, backLink);
         actions.setAlignment(Pos.CENTER);
@@ -90,34 +90,57 @@ public class RegisterView {
             PasswordField passwordField,
             TextField fullNameField,
             ComboBox<String> departmentBox,
-            Label messageLabel
+            Label messageLabel,
+            Button registerButton,
+            Hyperlink backLink
     ) {
-        try {
-            authController.registerStudent(
-                    usernameField.getText(),
-                    emailField.getText(),
-                    passwordField.getText(),
-                    fullNameField.getText(),
-                    departmentBox.getValue()
-            );
-            messageLabel.getStyleClass().remove("error-text");
-            if (!messageLabel.getStyleClass().contains("success-text")) {
-                messageLabel.getStyleClass().add("success-text");
-            }
-            messageLabel.setText("Account created. You can now log in.");
-        } catch (SQLException exception) {
-            messageLabel.getStyleClass().remove("success-text");
-            if (!messageLabel.getStyleClass().contains("error-text")) {
-                messageLabel.getStyleClass().add("error-text");
-            }
-            messageLabel.setText("Database connection failed. Start PostgreSQL and try again.");
-        } catch (IllegalArgumentException exception) {
-            messageLabel.getStyleClass().remove("success-text");
-            if (!messageLabel.getStyleClass().contains("error-text")) {
-                messageLabel.getStyleClass().add("error-text");
-            }
-            messageLabel.setText(exception.getMessage());
+        String username = usernameField.getText();
+        String email = emailField.getText();
+        String password = passwordField.getText();
+        String fullName = fullNameField.getText();
+        String department = departmentBox.getValue();
+        setBusy(registerButton, backLink, true);
+        showMessage(messageLabel, "Creating account...", false);
+
+        FxTaskRunner.run(
+                "student-account-creator",
+                () -> authController.registerStudent(username, email, password, fullName, department),
+                user -> {
+                    setBusy(registerButton, backLink, false);
+                    passwordField.clear();
+                    showMessage(messageLabel, "Account created. You can now log in.", true);
+                },
+                failure -> {
+                    setBusy(registerButton, backLink, false);
+                    showMessage(
+                            messageLabel,
+                            operationMessage(
+                                    failure,
+                                    "Database connection failed. Start PostgreSQL and try again."
+                            ),
+                            false
+                    );
+                }
+        );
+    }
+
+    private static void setBusy(Button registerButton, Hyperlink backLink, boolean busy) {
+        registerButton.setDisable(busy);
+        registerButton.setText(busy ? "Creating..." : "Register");
+        backLink.setDisable(busy);
+    }
+
+    private static void showMessage(Label messageLabel, String message, boolean success) {
+        messageLabel.getStyleClass().removeAll("error-text", "success-text");
+        messageLabel.getStyleClass().add(success ? "success-text" : "error-text");
+        messageLabel.setText(message);
+    }
+
+    private static String operationMessage(Throwable failure, String fallback) {
+        if (failure instanceof IllegalArgumentException || failure instanceof IllegalStateException) {
+            return failure.getMessage();
         }
+        return fallback;
     }
 
     private static TextField textField(String prompt) {

@@ -3,6 +3,7 @@ package com.eventportal.view;
 import com.eventportal.controller.AuthController;
 import com.eventportal.model.Role;
 import com.eventportal.model.User;
+import com.eventportal.util.FxTaskRunner;
 import com.eventportal.util.NavigationManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,7 +16,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.sql.SQLException;
 import java.util.function.Consumer;
 
 public class LoginView {
@@ -54,7 +54,13 @@ public class LoginView {
         Hyperlink registerLink = new Hyperlink("Create student account");
         registerLink.setOnAction(event -> navigationManager.show(new RegisterView(authController, navigationManager).build()));
 
-        loginButton.setOnAction(event -> login(usernameField, passwordField, messageLabel));
+        loginButton.setOnAction(event -> login(
+                usernameField,
+                passwordField,
+                messageLabel,
+                loginButton,
+                registerLink
+        ));
 
         HBox actions = new HBox(12, loginButton, registerLink);
         actions.setAlignment(Pos.CENTER);
@@ -71,15 +77,46 @@ public class LoginView {
         return root;
     }
 
-    private void login(TextField usernameField, PasswordField passwordField, Label messageLabel) {
-        try {
-            User user = authController.login(usernameField.getText(), passwordField.getText());
-            loginSuccessHandler.accept(user);
-        } catch (SQLException exception) {
-            messageLabel.setText("Database connection failed. Start PostgreSQL and try again.");
-        } catch (IllegalArgumentException | IllegalStateException exception) {
-            messageLabel.setText(exception.getMessage());
+    private void login(
+            TextField usernameField,
+            PasswordField passwordField,
+            Label messageLabel,
+            Button loginButton,
+            Hyperlink registerLink
+    ) {
+        String username = usernameField.getText();
+        String password = passwordField.getText();
+        setBusy(loginButton, registerLink, true);
+        messageLabel.setText("Signing in...");
+
+        FxTaskRunner.run(
+                "login-authenticator",
+                () -> authController.login(username, password),
+                user -> {
+                    setBusy(loginButton, registerLink, false);
+                    loginSuccessHandler.accept(user);
+                },
+                failure -> {
+                    setBusy(loginButton, registerLink, false);
+                    messageLabel.setText(operationMessage(
+                            failure,
+                            "Database connection failed. Start PostgreSQL and try again."
+                    ));
+                }
+        );
+    }
+
+    private static void setBusy(Button loginButton, Hyperlink registerLink, boolean busy) {
+        loginButton.setDisable(busy);
+        loginButton.setText(busy ? "Signing in..." : "Login");
+        registerLink.setDisable(busy);
+    }
+
+    private static String operationMessage(Throwable failure, String fallback) {
+        if (failure instanceof IllegalArgumentException || failure instanceof IllegalStateException) {
+            return failure.getMessage();
         }
+        return fallback;
     }
 
     public static String dashboardLabelFor(User user) {
