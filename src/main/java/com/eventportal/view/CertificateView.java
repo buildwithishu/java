@@ -2,6 +2,7 @@ package com.eventportal.view;
 
 import com.eventportal.controller.CertificateController;
 import com.eventportal.model.Certificate;
+import com.eventportal.util.CertificateFileUtil;
 import com.eventportal.util.DateTimeUtil;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,10 +13,11 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
 import java.awt.Desktop;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
@@ -57,10 +59,14 @@ public class CertificateView {
         Button openButton = new Button("Open PDF");
         openButton.setOnAction(event -> openCertificate(certificate, message));
 
+        Button saveButton = new Button("Save Copy");
+        saveButton.setOnAction(event -> saveCertificateCopy(certificate, saveButton, message));
+
         VBox text = new VBox(4, title, generatedAt, path, message);
         HBox.setHgrow(text, Priority.ALWAYS);
 
-        HBox row = new HBox(12, text, openButton);
+        HBox actions = new HBox(8, openButton, saveButton);
+        HBox row = new HBox(12, text, actions);
         row.getStyleClass().add("event-card");
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(14));
@@ -68,9 +74,8 @@ public class CertificateView {
     }
 
     private static void openCertificate(Certificate certificate, Label message) {
-        Path certificatePath = Path.of(certificate.certificatePath()).toAbsolutePath().normalize();
-        if (!Files.isRegularFile(certificatePath)) {
-            showError(message, "Certificate file is missing: " + certificatePath);
+        Path certificatePath = resolveCertificatePath(certificate, message);
+        if (certificatePath == null) {
             return;
         }
         if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
@@ -83,6 +88,48 @@ public class CertificateView {
             showSuccess(message, "Opened certificate PDF.");
         } catch (IOException exception) {
             showError(message, "Unable to open certificate PDF.");
+        }
+    }
+
+    private static void saveCertificateCopy(Certificate certificate, Button saveButton, Label message) {
+        Path sourcePath = resolveCertificatePath(certificate, message);
+        if (sourcePath == null) {
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Certificate PDF");
+        fileChooser.setInitialFileName(sourcePath.getFileName().toString());
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF files", "*.pdf"));
+
+        java.io.File destinationFile = fileChooser.showSaveDialog(saveButton.getScene().getWindow());
+        if (destinationFile == null) {
+            return;
+        }
+
+        Path destinationPath = destinationFile.toPath().toAbsolutePath().normalize();
+        if (sourcePath.equals(destinationPath)) {
+            showSuccess(message, "Certificate is already saved at this location.");
+            return;
+        }
+
+        try {
+            Path copiedPath = CertificateFileUtil.copyTo(certificate.certificatePath(), destinationPath);
+            showSuccess(message, "Certificate copy saved to " + copiedPath);
+        } catch (IOException exception) {
+            showError(message, "Unable to save certificate copy.");
+        }
+    }
+
+    private static Path resolveCertificatePath(Certificate certificate, Label message) {
+        try {
+            return CertificateFileUtil.resolveExisting(certificate.certificatePath());
+        } catch (IOException exception) {
+            showError(message, exception.getMessage());
+            return null;
+        } catch (InvalidPathException exception) {
+            showError(message, "Certificate path is invalid.");
+            return null;
         }
     }
 

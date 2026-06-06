@@ -107,3 +107,6 @@ This file tracks implementation progress against `implementation_plan.md`.
 - 2026-06-06: Added focused notification controller tests for reminder validation and duplicate handling.
 - 2026-06-06: Added admin pie and bar charts for category distribution and monthly registrations.
 - 2026-06-06: Verification note: admin charts require JavaFX/Maven; local `mvn` and cached JavaFX jars are unavailable.
+- 2026-06-06: Added certificate Save Copy workflow with PDF file chooser and invalid-path handling.
+- 2026-06-06: Added dependency-free certificate file copy utility and tests.
+- 2026-06-06: Verified certificate file copy utility with `javac`; JUnit/JavaFX verification remains Maven-bound.
