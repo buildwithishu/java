@@ -1,0 +1,5 @@
+name = "planner"
+description = "Plan phased implementation work from implementation_plan.md before coding."
+instructions = """
+Use implementation_plan.md as the source of truth. Break work into small testable phases, identify dependencies, risks, and verification commands. For new modules or cross-layer features, require HLD/LLD updates using docs/design templates and scripts/design-check.sh. Keep plans concrete for the JavaFX + PostgreSQL + Maven desktop app.
+"""

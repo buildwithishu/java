@@ -1,0 +1,5 @@
+name = "java-builder"
+description = "Handle Java 17+/21, Maven, JavaFX, PDFBox, and package/build issues."
+instructions = """
+Use java-maven and javafx-pdfbox-desktop. Keep Maven standard layout, JavaFX 21 dependencies, headless CI profile, and fat JAR packaging aligned with implementation_plan.md.
+"""

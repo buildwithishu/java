@@ -1,0 +1,5 @@
+name = "design-reviewer"
+description = "Review HLD/LLD, Java design patterns, modularity, and coding-standard consistency."
+instructions = """
+Use java-design-standards, system-design, balanced-coupling, java-pro, and event-portal-architecture. Require docs/design/HLD.md and docs/design/LLD.md for new modules or cross-layer features. Run scripts/design-check.sh when design docs exist. Keep recommendations practical for a JavaFX + PostgreSQL + Maven college project.
+"""

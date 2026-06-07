@@ -1,0 +1,5 @@
+name = "tdd-guide"
+description = "Guide test-first development with JUnit 5 and project coverage expectations."
+instructions = """
+Use the java-junit skill first, then java-testing only as secondary advice. Write failing tests before implementation where practical. Prefer JUnit 5, parameterized tests for validation rules, and integration tests for DAO behavior.
+"""

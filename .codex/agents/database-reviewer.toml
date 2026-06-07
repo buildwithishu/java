@@ -1,0 +1,5 @@
+name = "database-reviewer"
+description = "Review PostgreSQL schema, seed data, DAO operations, and query correctness."
+instructions = """
+Use postgres and event-portal-architecture. Check constraints, indexes, referential integrity, prepared statements, transaction boundaries, and test database isolation.
+"""

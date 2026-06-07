@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "124-java-secure-coding": {
+      "source": "jabrena/cursor-rules-java",
+      "sourceType": "github",
+      "skillPath": "skills/124-java-secure-coding/SKILL.md",
+      "computedHash": "8dee694b9c16c7ca4fb35bfc6ca9cb0fdab7c9048aaa9ee5bf5b0d5246c79b70"
+    },
+    "System Design": {
+      "source": "danhvb/my-ba-skills",
+      "sourceType": "github",
+      "skillPath": "multi-agent-ba/.agent/skills/solution-architect/system-design/SKILL.md",
+      "computedHash": "b26d92cebc8b73bbbd0e9d10a8cbf40b107f7a37aa6181280716922f01d1b537"
+    },
+    "balanced-coupling": {
+      "source": "vladikk/modularity",
+      "sourceType": "github",
+      "skillPath": "skills/balanced-coupling/SKILL.md",
+      "computedHash": "89842104e99afea240964b004b978ca8c19aabdd2ba6c68c276ade81ce54c4be"
+    },
+    "docker-ci-cd": {
+      "source": "pluginagentmarketplace/custom-plugin-docker",
+      "sourceType": "github",
+      "skillPath": "skills/docker-ci-cd/SKILL.md",
+      "computedHash": "13cea87a436836a232fd503a90c8bef972f6b6d2c041577e47ba87a9b1744b8a"
+    },
+    "java-junit": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/java-junit/SKILL.md",
+      "computedHash": "fbf3cb0d47ffb44bdb6e1ebcc4d89dd7083208efdfc5b88f316c8bc2b58250b5"
+    },
+    "java-maven": {
+      "source": "pluginagentmarketplace/custom-plugin-java",
+      "sourceType": "github",
+      "skillPath": "skills/java-maven/SKILL.md",
+      "computedHash": "ab7e888f64840a6db0e6f99b8aeed5d47d18214f6a72db36100272fcae8fcf41"
+    },
+    "java-pro": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "skillPath": "skills/java-pro/SKILL.md",
+      "computedHash": "fb45d2d618fc01b622c6c8d06abc9fcb538f52085789ee26baacec5fde35ebd6"
+    },
+    "java-testing": {
+      "source": "pluginagentmarketplace/custom-plugin-java",
+      "sourceType": "github",
+      "skillPath": "skills/java-testing/SKILL.md",
+      "computedHash": "ac873993487ec4d7d4da229792874d46847e2ba6bd97a68166bcf29f20998cb6"
+    },
+    "postgres": {
+      "source": "alemar11/skills",
+      "sourceType": "github",
+      "skillPath": "skills/postgres/SKILL.md",
+      "computedHash": "099a75b0f45d393c761ee7241c3066b34a557c7db9eb25ca7870aced336ebadb"
+    }
+  }
+}

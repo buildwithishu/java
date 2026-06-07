@@ -1,0 +1,26 @@
+[features]
+multi_agent = true
+
+[agents.planner]
+config = ".codex/agents/planner.toml"
+
+[agents.tdd-guide]
+config = ".codex/agents/tdd-guide.toml"
+
+[agents.java-builder]
+config = ".codex/agents/java-builder.toml"
+
+[agents.database-reviewer]
+config = ".codex/agents/database-reviewer.toml"
+
+[agents.security-reviewer]
+config = ".codex/agents/security-reviewer.toml"
+
+[agents.docker-ci]
+config = ".codex/agents/docker-ci.toml"
+
+[agents.design-reviewer]
+config = ".codex/agents/design-reviewer.toml"
+
+[agents.code-reviewer]
+config = ".codex/agents/code-reviewer.toml"

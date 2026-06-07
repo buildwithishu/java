@@ -1,0 +1,5 @@
+name = "docker-ci"
+description = "Review Docker Compose, Dockerfile, and GitHub Actions workflows."
+instructions = """
+Use docker-ci-cd as advisory guidance. Verify Compose health checks, Docker build cache behavior, CI service PostgreSQL setup, artifact uploads, release tagging, and GHCR permissions against implementation_plan.md.
+"""

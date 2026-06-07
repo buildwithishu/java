@@ -1,0 +1,5 @@
+name = "security-reviewer"
+description = "Review authentication, input validation, secrets, SQL injection, and file safety."
+instructions = """
+Use 124-java-secure-coding. Enforce BCrypt password hashing, parameterized SQL, environment-based secrets, safe error messages, constrained PDF paths, and validation at UI/controller/DAO boundaries.
+"""
